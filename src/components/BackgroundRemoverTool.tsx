@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef } from "react";
 import JSZip from "jszip";
 
-// Types
 export interface ProcessedImage {
   id: string;
   file: File;
@@ -16,23 +15,20 @@ export interface ProcessedImage {
 
 export type BgMode = "transparent" | "white" | "custom";
 
-// Inference engine (lazy loaded)
 let session: any = null;
 let ort: any = null;
 
 async function loadModel() {
   if (session) return session;
   ort = await import("onnxruntime-web");
+
+  // CRITICAL: set wasmPaths BEFORE creating session
+  ort.env.wasm.wasmPaths = "/wasm/";
   ort.env.wasm.numThreads = Math.min(navigator.hardwareConcurrency - 1, 4);
-  ort.env.wasm.simd = true;
 
-  const ep = ["wasm"];
-  try {
-    if ((navigator as any).gpu) ep.unshift("webgpu");
-  } catch {}
-
+  // WASM-only (JSEP needs 28MB file which exceeds CF 25MB limit)
   session = await ort.InferenceSession.create("/models/u2netp.onnx", {
-    executionProviders: ep,
+    executionProviders: ["wasm"],
   });
   return session;
 }
@@ -108,7 +104,7 @@ async function applyBackground(imageData: ImageData, mode: BgMode, customColor?:
 export default function BackgroundRemoverTool() {
   const [images, setImages] = useState<ProcessedImage[]>([]);
   const [bgMode, setBgMode] = useState<BgMode>("transparent");
-  const [customColor, setCustomColor] = useState("#2563eb");
+  const [customColor, setCustomColor] = useState("#0e8a5f");
   const [isProcessing, setIsProcessing] = useState(false);
   const [modelLoading, setModelLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -120,6 +116,7 @@ export default function BackgroundRemoverTool() {
 
   const handleFiles = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (fileArray.length === 0) return;
     const newImages: ProcessedImage[] = fileArray.map((file) => ({
       id: crypto.randomUUID(),
       file,
@@ -156,7 +153,7 @@ export default function BackgroundRemoverTool() {
           while (queue.length > 0) {
             const item = queue.shift();
             if (!item) break;
-            setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, status: "processing", progress: 0 } : img)));
+            setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, status: "processing" as const, progress: 0 } : img)));
             try {
               const bitmap = await createImageBitmap(item.file);
               setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, progress: 50 } : img)));
@@ -164,17 +161,17 @@ export default function BackgroundRemoverTool() {
               bitmap.close();
               const blob = await applyBackground(maskData, bgMode, customColor);
               const resultUrl = URL.createObjectURL(blob);
-              setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, status: "done", progress: 100, resultUrl } : img)));
+              setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, status: "done" as const, progress: 100, resultUrl } : img)));
             } catch (e) {
               console.error("Process failed:", e);
               setImages((prev) =>
                 prev.map((img) =>
-                  img.id === item.id ? { ...img, status: "error", error: e instanceof Error ? e.message : "Processing failed" } : img,
-                ),
+                  img.id === item.id ? { ...img, status: "error" as const, error: e instanceof Error ? e.message : "Processing failed" } : img
+                )
               );
             }
           }
-        })(),
+        })()
       );
     }
     await Promise.all(workers);
@@ -208,7 +205,7 @@ export default function BackgroundRemoverTool() {
   }, []);
 
   const retrySingle = useCallback(async (img: ProcessedImage) => {
-    setImages((prev) => prev.map((i) => (i.id === img.id ? { ...i, status: "queued", error: undefined } : i)));
+    setImages((prev) => prev.map((i) => (i.id === img.id ? { ...i, status: "queued" as const, error: undefined } : i)));
   }, []);
 
   const clearAll = useCallback(() => {
@@ -219,14 +216,13 @@ export default function BackgroundRemoverTool() {
     setImages([]);
   }, [images]);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); }, []);
+  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); }, []);
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      e.stopPropagation();
       if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
     },
-    [handleFiles],
+    [handleFiles]
   );
 
   const sortedImages = [...images].sort((a, b) => {
@@ -234,28 +230,31 @@ export default function BackgroundRemoverTool() {
     return order[a.status] - order[b.status];
   });
 
+  // Savings counter: 30s per image manual removal
+  const savedMinutes = completed > 0 ? Math.round((completed * 30) / 60) : 0;
+
   return (
-    <>
+    <div>
       {/* Dropzone */}
       {images.length === 0 && (
         <div
-          className="border-2 border-dashed border-accent rounded-2xl bg-accent-bg/30 hover:bg-accent-bg/50 transition-colors cursor-pointer p-10 sm:p-14 text-center"
+          className="border-2 border-dashed border-blue rounded-xl bg-blue-bg/30 hover:bg-blue-bg/50 transition-colors cursor-pointer p-12 sm:p-16 text-center"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
         >
-          <div className="text-5xl mb-4">📁</div>
-          <p className="text-ink font-semibold text-lg mb-2">Drop images or a folder here</p>
-          <p className="text-sub text-sm mb-4">JPG · PNG · WebP — unlimited files, no size limit</p>
+          <div className="text-5xl mb-4">⬇</div>
+          <p className="font-semibold text-lg mb-1">Drop images or a folder here</p>
+          <p className="text-sub text-sm mb-5">JPG · PNG · WebP · No upload · Processing on your device</p>
           <div className="flex justify-center gap-3">
             <button
-              className="bg-accent text-white px-5 py-2.5 rounded-lg font-medium hover:bg-accent/90 transition-colors"
+              className="bg-green text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm"
               onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
             >
               Select Images
             </button>
             <button
-              className="bg-white text-ink border border-line px-5 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="bg-white text-ink border border-line px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm"
               onClick={(e) => { e.stopPropagation(); folderInputRef.current?.click(); }}
             >
               Select Folder
@@ -265,43 +264,53 @@ export default function BackgroundRemoverTool() {
       )}
 
       <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }} />
-      <input ref={folderInputRef} type="file" className="hidden" onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }} />
+      {/* @ts-ignore */}
+      <input ref={folderInputRef} type="file" webkitdirectory="" className="hidden" onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }} />
 
       {/* Action Bar */}
       {images.length > 0 && (
-        <div className="bg-ink text-white rounded-xl p-4 mb-6 flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-300">BG:</span>
-            {(["transparent", "white", "custom"] as BgMode[]).map((m) => (
-              <button
-                key={m}
-                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors capitalize ${bgMode === m ? "bg-white text-ink" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
-                onClick={() => setBgMode(m)}
-              >
-                {m}
-              </button>
-            ))}
-            {bgMode === "custom" && <input type="color" value={customColor} onChange={(e) => setCustomColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />}
-          </div>
+        <div className="bg-ink text-white rounded-xl p-4 mb-5 flex flex-wrap items-center gap-3">
+          <span className="text-sm text-gray-300 font-semibold">Replace BG:</span>
+          {(["transparent", "white", "custom"] as BgMode[]).map((m) => (
+            <button
+              key={m}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${bgMode === m ? "bg-white text-ink" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
+              onClick={() => setBgMode(m)}
+            >
+              {m === "transparent" ? "Transparent" : m === "white" ? "White" : "Custom"}
+            </button>
+          ))}
+          {bgMode === "custom" && <input type="color" value={customColor} onChange={(e) => setCustomColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />}
+
           <div className="flex-1" />
+
+          {/* Savings counter */}
+          {completed > 0 && (
+            <span className="text-sm text-green-400 font-semibold">
+              ✓ Saved ~{savedMinutes} min ({completed} images)
+            </span>
+          )}
+
           <span className="text-sm text-gray-300">
-            {completed}/{total} done{failed > 0 && <span className="text-red-400 ml-2">· {failed} failed</span>}
+            {completed}/{total}{failed > 0 && <span className="text-red-400 ml-1">· {failed} fail</span>}
           </span>
-          <button className="text-sm text-gray-300 hover:text-white transition-colors" onClick={() => fileInputRef.current?.click()}>+ Add More</button>
+
+          <button className="text-sm text-gray-400 hover:text-white transition-colors" onClick={() => fileInputRef.current?.click()}>+ Add</button>
+
           {completed === 0 && !isProcessing ? (
-            <button className="bg-success text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-success/90 transition-colors" onClick={processQueue}>
+            <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={processQueue}>
               Remove Backgrounds
             </button>
           ) : isProcessing ? (
-            <button className="bg-gray-600 text-gray-300 px-6 py-2.5 rounded-lg font-semibold cursor-not-allowed" disabled>
-              {modelLoading ? "Loading model..." : `Processing ${completed}/${total}...`}
+            <button className="bg-gray-600 text-gray-300 px-5 py-2 rounded-lg font-semibold cursor-not-allowed text-sm" disabled>
+              {modelLoading ? "Loading model…" : `Processing ${completed}/${total}…`}
             </button>
           ) : (
             <div className="flex gap-2">
-              <button className="bg-success text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-success/90 transition-colors" onClick={downloadZip}>
-                ⬇ Download ZIP ({completed})
+              <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={downloadZip}>
+                ⬇ ZIP ({completed})
               </button>
-              <button className="text-sm text-gray-400 hover:text-white transition-colors px-3" onClick={clearAll}>Clear</button>
+              <button className="text-sm text-gray-400 hover:text-white px-2" onClick={clearAll}>Clear</button>
             </div>
           )}
         </div>
@@ -309,41 +318,39 @@ export default function BackgroundRemoverTool() {
 
       {/* Results Grid */}
       {images.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {sortedImages.map((img) => (
             <div
               key={img.id}
-              className={`rounded-xl border-2 overflow-hidden bg-white transition-all ${
-                img.status === "done" ? "border-success" : img.status === "processing" ? "border-accent" : img.status === "error" ? "border-error bg-error-bg" : "border-line"
+              className={`rounded-lg border-2 overflow-hidden bg-white transition-all ${
+                img.status === "done" ? "border-green" : img.status === "processing" ? "border-blue" : img.status === "error" ? "border-red bg-red-bg" : "border-line"
               }`}
             >
               <div className="aspect-square relative checkerboard">
                 <img src={img.resultUrl || img.originalUrl} alt={img.file.name} className="w-full h-full object-contain" />
                 {img.status === "processing" && (
                   <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <div className="w-12 h-12 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
                   </div>
                 )}
                 {img.status === "queued" && (
-                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                    <span className="text-2xl">⏸</span>
-                  </div>
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center text-sub text-xs font-medium">Queued</div>
                 )}
               </div>
               <div className="p-2">
                 <p className="text-xs text-sub truncate" title={img.file.name}>{img.file.name}</p>
                 <div className="flex items-center justify-between mt-1">
-                  <span className={`text-xs font-medium ${img.status === "done" ? "text-success" : img.status === "processing" ? "text-accent" : img.status === "error" ? "text-error" : "text-sub"}`}>
-                    {img.status === "done" ? "✓ Done" : img.status === "processing" ? "Processing..." : img.status === "error" ? "✕ Failed" : "Queued"}
+                  <span className={`text-xs font-semibold ${img.status === "done" ? "text-green" : img.status === "processing" ? "text-blue" : img.status === "error" ? "text-red" : "text-sub"}`}>
+                    {img.status === "done" ? "✓ Done" : img.status === "processing" ? "Processing…" : img.status === "error" ? "✕ Failed" : "Queued"}
                   </span>
-                  {img.status === "done" && <button className="text-xs text-accent hover:underline" onClick={() => downloadSingle(img)}>↓ Save</button>}
-                  {img.status === "error" && <button className="text-xs text-accent hover:underline" onClick={() => retrySingle(img)}>↻ Retry</button>}
+                  {img.status === "done" && <button className="text-xs text-green hover:underline font-medium" onClick={() => downloadSingle(img)}>↓ Save</button>}
+                  {img.status === "error" && <button className="text-xs text-blue hover:underline" onClick={() => retrySingle(img)}>↻ Retry</button>}
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }

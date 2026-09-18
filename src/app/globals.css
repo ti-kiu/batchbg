@@ -1,47 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --ink: #1a2332;
-  --sub: #5a6b80;
-  --line: #e3e8ef;
-  --bg: #f7f9fb;
-  --success: #0e8a5f;
-  --success-bg: #e6f5ef;
-  --error: #c0392b;
-  --error-bg: #fbeeec;
-  --accent: #2563eb;
-  --accent-bg: #eaf1fd;
+@theme {
+  --color-ink: #1a2332;
+  --color-sub: #5a6b80;
+  --color-line: #e3e8ef;
+  --color-bg: #f7f9fb;
+  --color-card: #ffffff;
+  --color-green: #0e8a5f;
+  --color-green-bg: #e6f5ef;
+  --color-red: #c0392b;
+  --color-red-bg: #fbeeec;
+  --color-amber: #b07a1a;
+  --color-amber-bg: #fdf5e3;
+  --color-blue: #2563eb;
+  --color-blue-bg: #eaf1fd;
+  --color-code: #f0f3f7;
 }
 
-* {
-  box-sizing: border-box;
-}
+@source "../src";
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  color: var(--ink);
-  background: var(--bg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--color-ink);
+  background: var(--color-bg);
+  line-height: 1.65;
+  font-size: 15px;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
-}
+h1, h2, h3, h4, h5, h6 { font-weight: 700; }
 
-/* Dropzone animation */
-@keyframes pulse-border {
-  0%, 100% { border-color: var(--accent); opacity: 1; }
-  50% { border-color: var(--success); opacity: 0.7; }
+.tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 4px;
 }
+.t-green { background: var(--color-green-bg); color: var(--color-green); }
+.t-red { background: var(--color-red-bg); color: var(--color-red); }
+.t-amber { background: var(--color-amber-bg); color: var(--color-amber); }
+.t-blue { background: var(--color-blue-bg); color: var(--color-blue); }
 
-.dropzone-active {
-  animation: pulse-border 1.5s ease-in-out infinite;
-}
-
-/* Checkerboard pattern for transparent preview */
 .checkerboard {
   background-image:
     linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
@@ -51,3 +53,5 @@ h1, h2, h3, h4, h5, h6 {
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
 }
+
+details summary::-webkit-details-marker { display: none; }
