@@ -100,14 +100,22 @@ async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
 async function applyBackground(imageData: ImageData, mode: BgMode, customColor?: string): Promise<Blob> {
   const canvas = new OffscreenCanvas(imageData.width, imageData.height);
   const ctx = canvas.getContext("2d")!;
-  if (mode === "white") {
-    ctx.fillStyle = "#FFFFFF";
+
+  if (mode === "transparent") {
+    // Transparent: just return the alpha image directly
+    ctx.putImageData(imageData, 0, 0);
+  } else {
+    // White or custom: draw background first, then composite subject on top
+    ctx.fillStyle = mode === "custom" && customColor ? customColor : "#FFFFFF";
     ctx.fillRect(0, 0, imageData.width, imageData.height);
-  } else if (mode === "custom" && customColor) {
-    ctx.fillStyle = customColor;
-    ctx.fillRect(0, 0, imageData.width, imageData.height);
+
+    // putImageData would overwrite the background — use a temp canvas + drawImage instead
+    const tmp = new OffscreenCanvas(imageData.width, imageData.height);
+    const tmpCtx = tmp.getContext("2d")!;
+    tmpCtx.putImageData(imageData, 0, 0);
+    ctx.drawImage(tmp, 0, 0);
   }
-  ctx.putImageData(imageData, 0, 0);
+
   return canvas.convertToBlob({ type: "image/png" });
 }
 
