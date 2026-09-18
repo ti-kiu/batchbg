@@ -238,14 +238,17 @@ export default function BackgroundRemoverTool() {
       {/* Dropzone */}
       {images.length === 0 && (
         <div
-          className="border-2 border-dashed border-blue rounded-xl bg-blue-bg/30 hover:bg-blue-bg/50 transition-colors cursor-pointer p-12 sm:p-16 text-center"
+          className="border-2 border-dashed border-blue rounded-xl bg-blue-bg/30 hover:bg-blue-bg/50 transition-colors cursor-pointer min-h-[40vh] flex flex-col items-center justify-center p-8 text-center"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
         >
-          <div className="text-5xl mb-4">⬇</div>
+          <svg className="w-16 h-16 text-sub mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
           <p className="font-semibold text-lg mb-1">Drop images or a folder here</p>
-          <p className="text-sub text-sm mb-5">JPG · PNG · WebP · No upload · Processing on your device</p>
+          <p className="text-sub text-sm mb-2">JPG · PNG · WebP · No upload · Processing on your device</p>
+          <p className="text-xs text-sub mb-5">or click to select</p>
           <div className="flex justify-center gap-3">
             <button
               className="bg-green text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm"

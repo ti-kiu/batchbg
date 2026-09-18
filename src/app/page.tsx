@@ -22,6 +22,12 @@ export default function Home() {
           </p>
         </div>
         <BackgroundRemoverTool />
+        {/* Trust badges — directly below upload area */}
+        <div className="flex justify-center gap-4 mt-5 flex-wrap">
+          <span className="tag t-green">🔒 Local Processing — images never leave your device</span>
+          <span className="tag t-green">♾ Unlimited Free — no per-image charges</span>
+          <span className="tag t-green">🚫 No Signup — open and start</span>
+        </div>
       </section>
 
       {/* SEO content BELOW the tool */}
