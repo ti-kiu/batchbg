@@ -1,26 +1,53 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #1a2332;
+  --sub: #5a6b80;
+  --line: #e3e8ef;
+  --bg: #f7f9fb;
+  --success: #0e8a5f;
+  --success-bg: #e6f5ef;
+  --error: #c0392b;
+  --error-bg: #fbeeec;
+  --accent: #2563eb;
+  --accent-bg: #eaf1fd;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+/* Dropzone animation */
+@keyframes pulse-border {
+  0%, 100% { border-color: var(--accent); opacity: 1; }
+  50% { border-color: var(--success); opacity: 0.7; }
+}
+
+.dropzone-active {
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+/* Checkerboard pattern for transparent preview */
+.checkerboard {
+  background-image:
+    linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
+    linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
+    linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
 }
