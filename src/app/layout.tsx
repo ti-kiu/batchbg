@@ -20,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script defer data-domain="batchbg.com" src="https://plausible.io/js/script.js"></script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -33,6 +34,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               operatingSystem: "Web Browser",
               offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
               featureList: ["Bulk background removal", "100% local processing", "No signup required", "Unlimited free usage"],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: [
+                { "@type": "Question", name: "How many images can I process at once?", acceptedAnswer: { "@type": "Answer", text: "There is no limit. Process 10, 100, or 1,000 images in a single session. The only constraint is your device's available memory." } },
+                { "@type": "Question", name: "Are my images uploaded to a server?", acceptedAnswer: { "@type": "Answer", text: "No. All processing happens locally in your browser using ONNX Runtime Web (WebAssembly). Your images never leave your device." } },
+                { "@type": "Question", name: "Is it really free? No watermarks?", acceptedAnswer: { "@type": "Answer", text: "Yes, completely free with no watermarks, no sign-up, and no per-image charges. Batch processing will always be free." } },
+                { "@type": "Question", name: "What image formats are supported?", acceptedAnswer: { "@type": "Answer", text: "Input: JPG, JPEG, PNG, and WebP. Output is always PNG with transparent or solid-color backgrounds." } },
+                { "@type": "Question", name: "How does this compare to remove.bg?", acceptedAnswer: { "@type": "Answer", text: "BatchBG is free and unlimited, while remove.bg charges per image and is shutting down December 1, 2026. We process everything locally via WebAssembly." } },
+                { "@type": "Question", name: "Can I use the results commercially?", acceptedAnswer: { "@type": "Answer", text: "Yes. All processed images are yours to use for Amazon, Etsy, Shopify, print-on-demand, or any commercial purpose with no restrictions." } },
+              ],
             }),
           }}
         />
