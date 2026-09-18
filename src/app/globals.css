@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@source "../src";
+@source "../public";
+
 @theme {
   --color-ink: #1a2332;
   --color-sub: #5a6b80;
@@ -16,8 +19,6 @@
   --color-blue-bg: #eaf1fd;
   --color-code: #f0f3f7;
 }
-
-@source "../src";
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 

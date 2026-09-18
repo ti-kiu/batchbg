@@ -22,11 +22,10 @@ async function loadModel() {
   if (session) return session;
   ort = await import("onnxruntime-web");
 
-  // CRITICAL: set wasmPaths BEFORE creating session
-  ort.env.wasm.wasmPaths = "/wasm/";
+  // Load WASM from jsDelivr CDN (local .jsep.wasm is 28MB, exceeds CF 25MB limit)
+  ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/";
   ort.env.wasm.numThreads = Math.min(navigator.hardwareConcurrency - 1, 4);
 
-  // WASM-only (JSEP needs 28MB file which exceeds CF 25MB limit)
   session = await ort.InferenceSession.create("/models/u2netp.onnx", {
     executionProviders: ["wasm"],
   });
