@@ -7,7 +7,8 @@ export interface ProcessedImage {
   id: string;
   file: File;
   originalUrl: string;
-  resultUrl: string | null;
+  resultUrls: Record<string, string>; // mode -> objectURL
+  previewMode: string; // which mode to show in grid
   status: "queued" | "processing" | "done" | "error";
   progress: number;
   error?: string;
@@ -15,10 +16,11 @@ export interface ProcessedImage {
 
 export type BgMode = "transparent" | "white" | "custom";
 
+const ALL_MODES: BgMode[] = ["transparent", "white", "custom"];
+const MODE_LABELS: Record<BgMode, string> = { transparent: "Transparent", white: "White", custom: "Custom" };
+
 let session: any = null;
 let ort: any = null;
-
-// Store mask data outside React state (ImageData objects are heavy)
 const maskStore = new Map<string, ImageData>();
 
 async function loadModel() {
@@ -27,15 +29,10 @@ async function loadModel() {
   ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/";
   const canMultiThread = typeof SharedArrayBuffer !== "undefined";
   ort.env.wasm.numThreads = canMultiThread ? Math.min(navigator.hardwareConcurrency - 1, 4) : 1;
-
   const SESSION_TIMEOUT = 15000;
   session = await Promise.race([
-    ort.InferenceSession.create("/models/u2netp.onnx", {
-      executionProviders: ["wasm"],
-    }),
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Model load timed out")), SESSION_TIMEOUT)
-    ),
+    ort.InferenceSession.create("/models/u2netp.onnx", { executionProviders: ["wasm"] }),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Model load timed out")), SESSION_TIMEOUT)),
   ]);
   return session;
 }
@@ -47,42 +44,31 @@ async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
   const ctx = canvas.getContext("2d")!;
   ctx.drawImage(imageBitmap, 0, 0, size, size);
   const imageData = ctx.getImageData(0, 0, size, size);
-
   const float32Data = new Float32Array(3 * size * size);
   for (let i = 0; i < size * size; i++) {
     float32Data[i] = imageData.data[i * 4] / 255.0;
     float32Data[size * size + i] = imageData.data[i * 4 + 1] / 255.0;
     float32Data[2 * size * size + i] = imageData.data[i * 4 + 2] / 255.0;
   }
-
   const inputTensor = new ort.Tensor("float32", float32Data, [1, 3, size, size]);
   const feeds: Record<string, any> = {};
   feeds[s.inputNames[0]] = inputTensor;
   const results = await s.run(feeds);
   const output = results[s.outputNames[0]];
   const maskData = output.data as Float32Array;
-
   const maskImageData = new ImageData(imageBitmap.width, imageBitmap.height);
   const origCanvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
   const origCtx = origCanvas.getContext("2d")!;
   origCtx.drawImage(imageBitmap, 0, 0);
   const origData = origCtx.getImageData(0, 0, imageBitmap.width, imageBitmap.height);
-
   for (let y = 0; y < imageBitmap.height; y++) {
     for (let x = 0; x < imageBitmap.width; x++) {
       const srcX = (x / imageBitmap.width) * size;
       const srcY = (y / imageBitmap.height) * size;
-      const x0 = Math.floor(srcX);
-      const y0 = Math.floor(srcY);
-      const x1 = Math.min(x0 + 1, size - 1);
-      const y1 = Math.min(y0 + 1, size - 1);
-      const fx = srcX - x0;
-      const fy = srcY - y0;
-      const v00 = maskData[y0 * size + x0];
-      const v10 = maskData[y0 * size + x1];
-      const v01 = maskData[y1 * size + x0];
-      const v11 = maskData[y1 * size + x1];
-      const val = v00 * (1 - fx) * (1 - fy) + v10 * fx * (1 - fy) + v01 * (1 - fx) * fy + v11 * fx * fy;
+      const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
+      const x1 = Math.min(x0 + 1, size - 1), y1 = Math.min(y0 + 1, size - 1);
+      const fx = srcX - x0, fy = srcY - y0;
+      const val = maskData[y0 * size + x0] * (1 - fx) * (1 - fy) + maskData[y0 * size + x1] * fx * (1 - fy) + maskData[y1 * size + x0] * (1 - fx) * fy + maskData[y1 * size + x1] * fx * fy;
       const alpha = Math.round(Math.max(0, Math.min(1, val)) * 255);
       const idx = (y * imageBitmap.width + x) * 4;
       maskImageData.data[idx] = origData.data[idx];
@@ -97,24 +83,31 @@ async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
 async function applyBackground(imageData: ImageData, mode: BgMode, customColor?: string): Promise<Blob> {
   const canvas = new OffscreenCanvas(imageData.width, imageData.height);
   const ctx = canvas.getContext("2d")!;
-
   if (mode === "transparent") {
     ctx.putImageData(imageData, 0, 0);
   } else {
     ctx.fillStyle = mode === "custom" && customColor ? customColor : "#FFFFFF";
     ctx.fillRect(0, 0, imageData.width, imageData.height);
     const tmp = new OffscreenCanvas(imageData.width, imageData.height);
-    const tmpCtx = tmp.getContext("2d")!;
-    tmpCtx.putImageData(imageData, 0, 0);
+    tmp.getContext("2d")!.putImageData(imageData, 0, 0);
     ctx.drawImage(tmp, 0, 0);
   }
-
   return canvas.convertToBlob({ type: "image/png" });
+}
+
+// Generate all selected variants from a mask
+async function generateVariants(mask: ImageData, modes: BgMode[], customColor?: string): Promise<Record<string, string>> {
+  const urls: Record<string, string> = {};
+  for (const mode of modes) {
+    const blob = await applyBackground(mask, mode, customColor);
+    urls[mode] = URL.createObjectURL(blob);
+  }
+  return urls;
 }
 
 export default function BackgroundRemoverTool() {
   const [images, setImages] = useState<ProcessedImage[]>([]);
-  const [bgMode, setBgMode] = useState<BgMode>("transparent");
+  const [selectedModes, setSelectedModes] = useState<Set<BgMode>>(new Set(["transparent"]));
   const [customColor, setCustomColor] = useState("#0e8a5f");
   const [isProcessing, setIsProcessing] = useState(false);
   const [modelLoading, setModelLoading] = useState(false);
@@ -124,64 +117,70 @@ export default function BackgroundRemoverTool() {
   const completed = images.filter((i) => i.status === "done").length;
   const failed = images.filter((i) => i.status === "error").length;
   const total = images.length;
+  const modeCount = selectedModes.size;
+
+  const toggleMode = useCallback((mode: BgMode) => {
+    setSelectedModes((prev) => {
+      const next = new Set(prev);
+      if (next.has(mode)) {
+        if (next.size === 1) return prev; // must keep at least one
+        next.delete(mode);
+      } else {
+        next.add(mode);
+      }
+      return next;
+    });
+  }, []);
 
   const handleFiles = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
     if (fileArray.length === 0) return;
+    const firstMode = [...selectedModes][0];
     const newImages: ProcessedImage[] = fileArray.map((file) => ({
       id: crypto.randomUUID(),
       file,
       originalUrl: URL.createObjectURL(file),
-      resultUrl: null,
+      resultUrls: {},
+      previewMode: firstMode,
       status: "queued",
       progress: 0,
     }));
     setImages((prev) => [...prev, ...newImages]);
-  }, []);
+  }, [selectedModes]);
 
-  // Re-apply background for all done images when bgMode or customColor changes
+  // Re-generate variants when modes or customColor changes (for already-done images)
   useEffect(() => {
     const doneImages = images.filter((i) => i.status === "done");
     if (doneImages.length === 0) return;
-
     let cancelled = false;
     (async () => {
       for (const img of doneImages) {
         const mask = maskStore.get(img.id);
         if (!mask) continue;
-        const blob = await applyBackground(mask, bgMode, customColor);
+        const newUrls = await generateVariants(mask, [...selectedModes], customColor);
         if (cancelled) return;
-        const newUrl = URL.createObjectURL(blob);
+        // Revoke old URLs
+        Object.values(img.resultUrls).forEach((u) => URL.revokeObjectURL(u));
+        const newPreview = selectedModes.has(img.previewMode as BgMode) ? img.previewMode : [...selectedModes][0];
         setImages((prev) =>
-          prev.map((i) => {
-            if (i.id !== img.id) return i;
-            if (i.resultUrl) URL.revokeObjectURL(i.resultUrl);
-            return { ...i, resultUrl: newUrl };
-          })
+          prev.map((i) => (i.id === img.id ? { ...i, resultUrls: newUrls, previewMode: newPreview } : i))
         );
       }
     })();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bgMode, customColor]);
+  }, [selectedModes, customColor]);
 
   const processQueue = useCallback(async () => {
     if (isProcessing) return;
     setIsProcessing(true);
     setModelLoading(true);
-    try {
-      await loadModel();
-      setModelLoading(false);
-    } catch (e) {
-      console.error("Model load failed:", e);
-      setIsProcessing(false);
-      setModelLoading(false);
-      return;
-    }
+    try { await loadModel(); setModelLoading(false); } catch (e) { setIsProcessing(false); setModelLoading(false); return; }
 
     const pending = images.filter((i) => i.status === "queued" || i.status === "error");
     const concurrency = Math.min(navigator.hardwareConcurrency - 1, 4);
     const queue = [...pending];
+    const modes = [...selectedModes];
     const workers: Promise<void>[] = [];
 
     for (let i = 0; i < concurrency; i++) {
@@ -194,20 +193,13 @@ export default function BackgroundRemoverTool() {
             try {
               const bitmap = await createImageBitmap(item.file);
               setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, progress: 50 } : img)));
-              const maskData = await removeBackground(bitmap);
+              const mask = await removeBackground(bitmap);
               bitmap.close();
-              // Store mask for instant re-apply
-              maskStore.set(item.id, maskData);
-              const blob = await applyBackground(maskData, bgMode, customColor);
-              const resultUrl = URL.createObjectURL(blob);
-              setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, status: "done" as const, progress: 100, resultUrl } : img)));
+              maskStore.set(item.id, mask);
+              const urls = await generateVariants(mask, modes, customColor);
+              setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, status: "done" as const, progress: 100, resultUrls: urls, previewMode: modes[0] } : img)));
             } catch (e) {
-              console.error("Process failed:", e);
-              setImages((prev) =>
-                prev.map((img) =>
-                  img.id === item.id ? { ...img, status: "error" as const, error: e instanceof Error ? e.message : "Processing failed" } : img
-                )
-              );
+              setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, status: "error" as const, error: e instanceof Error ? e.message : "Failed" } : img)));
             }
           }
         })()
@@ -215,124 +207,68 @@ export default function BackgroundRemoverTool() {
     }
     await Promise.all(workers);
     setIsProcessing(false);
-  }, [images, isProcessing, bgMode, customColor]);
+  }, [images, isProcessing, selectedModes, customColor]);
 
   const downloadZip = useCallback(async () => {
     const zip = new JSZip();
-    const doneImages = images.filter((i) => i.status === "done" && i.resultUrl);
-    for (const img of doneImages) {
-      const response = await fetch(img.resultUrl!);
-      const blob = await response.blob();
-      const name = img.file.name.replace(/\.[^.]+$/, "") + "_nobg.png";
-      zip.file(name, blob);
-    }
-    const content = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(content);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "batchbg_results.zip";
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [images]);
-
-  // Export all 3 variants: transparent/ white/ custom/
-  const downloadAllVariants = useCallback(async () => {
     const doneImages = images.filter((i) => i.status === "done");
-    const hasMasks = doneImages.some((i) => maskStore.has(i.id));
-    if (!hasMasks) return;
-
-    const zip = new JSZip();
-    const modes: { mode: BgMode; folder: string }[] = [
-      { mode: "transparent", folder: "transparent" },
-      { mode: "white", folder: "white" },
-      { mode: "custom", folder: "custom" },
-    ];
-
     for (const img of doneImages) {
-      const mask = maskStore.get(img.id);
-      if (!mask) continue;
       const baseName = img.file.name.replace(/\.[^.]+$/, "");
-      for (const { mode, folder } of modes) {
-        const blob = await applyBackground(mask, mode, customColor);
-        zip.file(`${folder}/${baseName}_nobg.png`, blob);
+      for (const [mode, url] of Object.entries(img.resultUrls)) {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const folder = modeCount > 1 ? `${mode}/` : "";
+        zip.file(`${folder}${baseName}_nobg.png`, blob);
       }
     }
-
     const content = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(content);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(content);
+    a.download = modeCount > 1 ? "batchbg_all_variants.zip" : "batchbg_results.zip";
+    a.click();
+  }, [images, modeCount]);
+
+  const downloadSingle = useCallback((img: ProcessedImage) => {
+    const url = img.resultUrls[img.previewMode];
+    if (!url) return;
     const a = document.createElement("a");
     a.href = url;
-    a.download = "batchbg_all_variants.zip";
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [images, customColor]);
-
-  const downloadSingle = useCallback(async (img: ProcessedImage) => {
-    if (!img.resultUrl) return;
-    const a = document.createElement("a");
-    a.href = img.resultUrl;
-    a.download = img.file.name.replace(/\.[^.]+$/, "") + "_nobg.png";
+    a.download = img.file.name.replace(/\.[^.]+$/, "") + `_${img.previewMode}.png`;
     a.click();
   }, []);
 
-  const retrySingle = useCallback(async (img: ProcessedImage) => {
+  const retrySingle = useCallback((img: ProcessedImage) => {
     setImages((prev) => prev.map((i) => (i.id === img.id ? { ...i, status: "queued" as const, error: undefined } : i)));
   }, []);
 
   const clearAll = useCallback(() => {
     images.forEach((img) => {
       URL.revokeObjectURL(img.originalUrl);
-      if (img.resultUrl) URL.revokeObjectURL(img.resultUrl);
+      Object.values(img.resultUrls).forEach((u) => URL.revokeObjectURL(u));
       maskStore.delete(img.id);
     });
     setImages([]);
   }, [images]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); }, []);
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
-    },
-    [handleFiles]
-  );
+  const handleDrop = useCallback((e: React.DragEvent) => { e.preventDefault(); if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files); }, [handleFiles]);
 
-  const sortedImages = [...images].sort((a, b) => {
-    const order = { done: 0, processing: 1, queued: 2, error: 3 };
-    return order[a.status] - order[b.status];
-  });
-
-  const savedMinutes = completed > 0 ? Math.round((completed * 30) / 60) : 0;
+  const sortedImages = [...images].sort((a, b) => ({ done: 0, processing: 1, queued: 2, error: 3 }[a.status] - { done: 0, processing: 1, queued: 2, error: 3 }[b.status]));
+  const savedMinutes = completed > 0 ? Math.round((completed * 30 * modeCount) / 60) : 0;
+  const variantCount = completed * modeCount;
 
   return (
     <div>
       {/* Dropzone */}
       {images.length === 0 && (
-        <div
-          className="border-2 border-dashed border-blue rounded-xl bg-blue-bg/30 hover:bg-blue-bg/50 transition-colors cursor-pointer min-h-[40vh] flex flex-col items-center justify-center p-8 text-center"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <svg className="w-16 h-16 text-sub mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-          </svg>
+        <div className="border-2 border-dashed border-blue rounded-xl bg-blue-bg/30 hover:bg-blue-bg/50 transition-colors cursor-pointer min-h-[40vh] flex flex-col items-center justify-center p-8 text-center" onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
+          <svg className="w-16 h-16 text-sub mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
           <p className="font-semibold text-lg mb-1">Drop images or a folder here</p>
           <p className="text-sub text-sm mb-2">JPG · PNG · WebP · No upload · Processing on your device</p>
           <p className="text-xs text-sub mb-5">or click to select</p>
           <div className="flex justify-center gap-3">
-            <button
-              className="bg-green text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm"
-              onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-            >
-              Select Images
-            </button>
-            <button
-              className="bg-white text-ink border border-line px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm"
-              onClick={(e) => { e.stopPropagation(); folderInputRef.current?.click(); }}
-            >
-              Select Folder
-            </button>
+            <button className="bg-green text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>Select Images</button>
+            <button className="bg-white text-ink border border-line px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm" onClick={(e) => { e.stopPropagation(); folderInputRef.current?.click(); }}>Select Folder</button>
           </div>
         </div>
       )}
@@ -345,34 +281,27 @@ export default function BackgroundRemoverTool() {
       {images.length > 0 && (
         <div className="bg-ink text-white rounded-xl p-4 mb-5 flex flex-wrap items-center gap-3">
           <span className="text-sm text-gray-300 font-semibold">Replace BG:</span>
-          {(["transparent", "white", "custom"] as BgMode[]).map((m) => (
-            <button
-              key={m}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${bgMode === m ? "bg-white text-ink" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}
-              onClick={() => setBgMode(m)}
-            >
-              {m === "transparent" ? "Transparent" : m === "white" ? "White" : "Custom"}
+          {ALL_MODES.map((m) => (
+            <button key={m} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all capitalize border-2 ${selectedModes.has(m) ? "bg-white text-ink border-white" : "bg-transparent text-gray-400 border-gray-600 hover:border-gray-400"}`} onClick={() => toggleMode(m)}>
+              {selectedModes.has(m) && <span className="mr-1">✓</span>}
+              {MODE_LABELS[m]}
             </button>
           ))}
-          {bgMode === "custom" && <input type="color" value={customColor} onChange={(e) => setCustomColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />}
+          {selectedModes.has("custom") && <input type="color" value={customColor} onChange={(e) => setCustomColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />}
 
           <div className="flex-1" />
 
           {completed > 0 && (
-            <span className="text-sm text-green-400 font-semibold">
-              ✓ Saved ~{savedMinutes} min ({completed} images)
-            </span>
+            <span className="text-sm text-green-400 font-semibold">✓ Saved ~{savedMinutes} min ({variantCount} files)</span>
           )}
 
-          <span className="text-sm text-gray-300">
-            {completed}/{total}{failed > 0 && <span className="text-red-400 ml-1">· {failed} fail</span>}
-          </span>
+          <span className="text-sm text-gray-300">{completed}/{total}{failed > 0 && <span className="text-red-400 ml-1">· {failed} fail</span>}</span>
 
           <button className="text-sm text-gray-400 hover:text-white transition-colors" onClick={() => fileInputRef.current?.click()}>+ Add</button>
 
           {completed === 0 && !isProcessing ? (
             <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={processQueue}>
-              Remove Backgrounds
+              Remove Backgrounds{modeCount > 1 ? ` (${modeCount} modes)` : ""}
             </button>
           ) : isProcessing ? (
             <button className="bg-gray-600 text-gray-300 px-5 py-2 rounded-lg font-semibold cursor-not-allowed text-sm" disabled>
@@ -381,10 +310,7 @@ export default function BackgroundRemoverTool() {
           ) : (
             <div className="flex gap-2 items-center">
               <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={downloadZip}>
-                ⬇ ZIP ({completed})
-              </button>
-              <button className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg font-medium hover:bg-gray-600 transition-colors text-sm" onClick={downloadAllVariants} title="Export transparent + white + custom for all images">
-                All 3 ⬇
+                ⬇ ZIP ({variantCount})
               </button>
               <button className="text-sm text-gray-400 hover:text-white px-2" onClick={clearAll}>Clear</button>
             </div>
@@ -395,36 +321,39 @@ export default function BackgroundRemoverTool() {
       {/* Results Grid */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {sortedImages.map((img) => (
-            <div
-              key={img.id}
-              className={`rounded-lg border-2 overflow-hidden bg-white transition-all ${
-                img.status === "done" ? "border-green" : img.status === "processing" ? "border-blue" : img.status === "error" ? "border-red bg-red-bg" : "border-line"
-              }`}
-            >
-              <div className="aspect-square relative checkerboard">
-                <img src={img.resultUrl || img.originalUrl} alt={img.file.name} className="w-full h-full object-contain" />
-                {img.status === "processing" && (
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
+          {sortedImages.map((img) => {
+            const displayUrl = img.resultUrls[img.previewMode] || img.resultUrls[[...selectedModes][0]] || img.originalUrl;
+            const hasVariants = Object.keys(img.resultUrls).length > 1;
+            return (
+              <div key={img.id} className={`rounded-lg border-2 overflow-hidden bg-white transition-all ${img.status === "done" ? "border-green" : img.status === "processing" ? "border-blue" : img.status === "error" ? "border-red bg-red-bg" : "border-line"}`}>
+                <div className="aspect-square relative checkerboard">
+                  <img src={displayUrl} alt={img.file.name} className="w-full h-full object-contain" />
+                  {img.status === "processing" && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" /></div>}
+                  {img.status === "queued" && <div className="absolute inset-0 bg-black/10 flex items-center justify-center text-sub text-xs font-medium">Queued</div>}
+                </div>
+                {/* Variant tabs */}
+                {img.status === "done" && hasVariants && (
+                  <div className="flex border-t border-line">
+                    {Object.keys(img.resultUrls).map((mode) => (
+                      <button key={mode} className={`flex-1 text-[10px] py-1 font-medium capitalize transition-colors ${img.previewMode === mode ? "bg-green-bg text-green" : "text-sub hover:bg-gray-50"}`} onClick={() => setImages((prev) => prev.map((i) => (i.id === img.id ? { ...i, previewMode: mode } : i)))}>
+                        {mode === "transparent" ? "T" : mode === "white" ? "W" : "C"}
+                      </button>
+                    ))}
                   </div>
                 )}
-                {img.status === "queued" && (
-                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center text-sub text-xs font-medium">Queued</div>
-                )}
-              </div>
-              <div className="p-2">
-                <p className="text-xs text-sub truncate" title={img.file.name}>{img.file.name}</p>
-                <div className="flex items-center justify-between mt-1">
-                  <span className={`text-xs font-semibold ${img.status === "done" ? "text-green" : img.status === "processing" ? "text-blue" : img.status === "error" ? "text-red" : "text-sub"}`}>
-                    {img.status === "done" ? "✓ Done" : img.status === "processing" ? "Processing…" : img.status === "error" ? "✕ Failed" : "Queued"}
-                  </span>
-                  {img.status === "done" && <button className="text-xs text-green hover:underline font-medium" onClick={() => downloadSingle(img)}>↓ Save</button>}
-                  {img.status === "error" && <button className="text-xs text-blue hover:underline" onClick={() => retrySingle(img)}>↻ Retry</button>}
+                <div className="p-2">
+                  <p className="text-xs text-sub truncate" title={img.file.name}>{img.file.name}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className={`text-xs font-semibold ${img.status === "done" ? "text-green" : img.status === "processing" ? "text-blue" : img.status === "error" ? "text-red" : "text-sub"}`}>
+                      {img.status === "done" ? "✓ Done" : img.status === "processing" ? "Processing…" : img.status === "error" ? "✕ Failed" : "Queued"}
+                    </span>
+                    {img.status === "done" && <button className="text-xs text-green hover:underline font-medium" onClick={() => downloadSingle(img)}>↓ Save</button>}
+                    {img.status === "error" && <button className="text-xs text-blue hover:underline" onClick={() => retrySingle(img)}>↻ Retry</button>}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
