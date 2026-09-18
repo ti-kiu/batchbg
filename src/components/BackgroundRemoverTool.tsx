@@ -24,11 +24,22 @@ async function loadModel() {
 
   // Load WASM from jsDelivr CDN (local .jsep.wasm is 28MB, exceeds CF 25MB limit)
   ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/";
-  ort.env.wasm.numThreads = Math.min(navigator.hardwareConcurrency - 1, 4);
 
-  session = await ort.InferenceSession.create("/models/u2netp.onnx", {
-    executionProviders: ["wasm"],
-  });
+  // CRITICAL: multi-threading requires crossOriginIsolated (COEP/COOP headers)
+  // Without it, SharedArrayBuffer is unavailable and numThreads>1 hangs silently
+  const canMultiThread = typeof SharedArrayBuffer !== "undefined";
+  ort.env.wasm.numThreads = canMultiThread ? Math.min(navigator.hardwareConcurrency - 1, 4) : 1;
+
+  // Create session with timeout — if WASM EP hangs, fail fast
+  const SESSION_TIMEOUT = 15000;
+  session = await Promise.race([
+    ort.InferenceSession.create("/models/u2netp.onnx", {
+      executionProviders: ["wasm"],
+    }),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Model load timed out — check WASM files")), SESSION_TIMEOUT)
+    ),
+  ]);
   return session;
 }
 
