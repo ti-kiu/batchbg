@@ -71,35 +71,58 @@ async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
   const maskImageData = new ImageData(imageBitmap.width, imageBitmap.height);
   const w = imageBitmap.width, h = imageBitmap.height;
 
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const srcX = (x / w) * size;
-      const srcY = (y / h) * size;
-      const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
-      const x1 = Math.min(x0 + 1, size - 1), y1 = Math.min(y0 + 1, size - 1);
-      const fx = srcX - x0, fy = srcY - y0;
-      const val = maskData[y0 * size + x0] * (1 - fx) * (1 - fy) + maskData[y0 * size + x1] * fx * (1 - fy) + maskData[y1 * size + x0] * (1 - fx) * fy + maskData[y1 * size + x1] * fx * fy;
-      let alpha = Math.max(0, Math.min(1, val));
-      const idx = (y * w + x) * 4;
-
-      // Chroma key refinement: boost AI mask with color distance from background
-      if (bgColor) {
+  // For uniform backgrounds: chroma key is PRIMARY, AI only refines edges
+  // For normal photos: AI is PRIMARY
+  if (bgColor) {
+    // Chroma key primary mask
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = (y * w + x) * 4;
         const r = origData.data[idx], g = origData.data[idx + 1], b = origData.data[idx + 2];
         const dist = Math.sqrt((r - bgColor.r) ** 2 + (g - bgColor.g) ** 2 + (b - bgColor.b) ** 2);
-        // If pixel is very close to background color, force it to be transparent
-        if (dist < 60) alpha = 0;
-        // If pixel is in the gray zone, blend AI mask with chroma key
-        else if (dist < 120) {
-          const chromaAlpha = (dist - 60) / 60; // 0 to 1
-          alpha = Math.min(alpha, chromaAlpha);
-        }
-        // If pixel is far from background, keep AI mask (it's foreground)
-      }
 
-      maskImageData.data[idx] = origData.data[idx];
-      maskImageData.data[idx + 1] = origData.data[idx + 1];
-      maskImageData.data[idx + 2] = origData.data[idx + 2];
-      maskImageData.data[idx + 3] = Math.round(alpha * 255);
+        let alpha: number;
+        if (dist < 50) {
+          alpha = 0; // Definitely background
+        } else if (dist < 100) {
+          alpha = (dist - 50) / 50; // Smooth transition
+        } else {
+          alpha = 1; // Definitely foreground
+        }
+
+        // Use AI mask to refine the edges (where chroma key is uncertain)
+        if (alpha > 0 && alpha < 1) {
+          const srcX = (x / w) * size, srcY = (y / h) * size;
+          const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
+          const x1 = Math.min(x0 + 1, size - 1), y1 = Math.min(y0 + 1, size - 1);
+          const fx = srcX - x0, fy = srcY - y0;
+          const aiAlpha = maskData[y0 * size + x0] * (1 - fx) * (1 - fy) + maskData[y0 * size + x1] * fx * (1 - fy) + maskData[y1 * size + x0] * (1 - fx) * fy + maskData[y1 * size + x1] * fx * fy;
+          // Blend: trust chroma key more, use AI for edge refinement
+          alpha = alpha * 0.7 + Math.max(0, Math.min(1, aiAlpha)) * 0.3;
+        }
+
+        maskImageData.data[idx] = origData.data[idx];
+        maskImageData.data[idx + 1] = origData.data[idx + 1];
+        maskImageData.data[idx + 2] = origData.data[idx + 2];
+        maskImageData.data[idx + 3] = Math.round(alpha * 255);
+      }
+    }
+  } else {
+    // Normal photo: AI mask primary, with edge refinement
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const srcX = (x / w) * size, srcY = (y / h) * size;
+        const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
+        const x1 = Math.min(x0 + 1, size - 1), y1 = Math.min(y0 + 1, size - 1);
+        const fx = srcX - x0, fy = srcY - y0;
+        const val = maskData[y0 * size + x0] * (1 - fx) * (1 - fy) + maskData[y0 * size + x1] * fx * (1 - fy) + maskData[y1 * size + x0] * (1 - fx) * fy + maskData[y1 * size + x1] * fx * fy;
+        const alpha = Math.max(0, Math.min(1, val));
+        const idx = (y * w + x) * 4;
+        maskImageData.data[idx] = origData.data[idx];
+        maskImageData.data[idx + 1] = origData.data[idx + 1];
+        maskImageData.data[idx + 2] = origData.data[idx + 2];
+        maskImageData.data[idx + 3] = Math.round(alpha * 255);
+      }
     }
   }
 
