@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import JSZip from "jszip";
 
 export interface ProcessedImage {
@@ -18,26 +18,23 @@ export type BgMode = "transparent" | "white" | "custom";
 let session: any = null;
 let ort: any = null;
 
+// Store mask data outside React state (ImageData objects are heavy)
+const maskStore = new Map<string, ImageData>();
+
 async function loadModel() {
   if (session) return session;
   ort = await import("onnxruntime-web");
-
-  // Load WASM from jsDelivr CDN (local .jsep.wasm is 28MB, exceeds CF 25MB limit)
   ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/";
-
-  // CRITICAL: multi-threading requires crossOriginIsolated (COEP/COOP headers)
-  // Without it, SharedArrayBuffer is unavailable and numThreads>1 hangs silently
   const canMultiThread = typeof SharedArrayBuffer !== "undefined";
   ort.env.wasm.numThreads = canMultiThread ? Math.min(navigator.hardwareConcurrency - 1, 4) : 1;
 
-  // Create session with timeout — if WASM EP hangs, fail fast
   const SESSION_TIMEOUT = 15000;
   session = await Promise.race([
     ort.InferenceSession.create("/models/u2netp.onnx", {
       executionProviders: ["wasm"],
     }),
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Model load timed out — check WASM files")), SESSION_TIMEOUT)
+      setTimeout(() => reject(new Error("Model load timed out")), SESSION_TIMEOUT)
     ),
   ]);
   return session;
@@ -102,14 +99,10 @@ async function applyBackground(imageData: ImageData, mode: BgMode, customColor?:
   const ctx = canvas.getContext("2d")!;
 
   if (mode === "transparent") {
-    // Transparent: just return the alpha image directly
     ctx.putImageData(imageData, 0, 0);
   } else {
-    // White or custom: draw background first, then composite subject on top
     ctx.fillStyle = mode === "custom" && customColor ? customColor : "#FFFFFF";
     ctx.fillRect(0, 0, imageData.width, imageData.height);
-
-    // putImageData would overwrite the background — use a temp canvas + drawImage instead
     const tmp = new OffscreenCanvas(imageData.width, imageData.height);
     const tmpCtx = tmp.getContext("2d")!;
     tmpCtx.putImageData(imageData, 0, 0);
@@ -146,6 +139,32 @@ export default function BackgroundRemoverTool() {
     setImages((prev) => [...prev, ...newImages]);
   }, []);
 
+  // Re-apply background for all done images when bgMode or customColor changes
+  useEffect(() => {
+    const doneImages = images.filter((i) => i.status === "done");
+    if (doneImages.length === 0) return;
+
+    let cancelled = false;
+    (async () => {
+      for (const img of doneImages) {
+        const mask = maskStore.get(img.id);
+        if (!mask) continue;
+        const blob = await applyBackground(mask, bgMode, customColor);
+        if (cancelled) return;
+        const newUrl = URL.createObjectURL(blob);
+        setImages((prev) =>
+          prev.map((i) => {
+            if (i.id !== img.id) return i;
+            if (i.resultUrl) URL.revokeObjectURL(i.resultUrl);
+            return { ...i, resultUrl: newUrl };
+          })
+        );
+      }
+    })();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bgMode, customColor]);
+
   const processQueue = useCallback(async () => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -177,6 +196,8 @@ export default function BackgroundRemoverTool() {
               setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, progress: 50 } : img)));
               const maskData = await removeBackground(bitmap);
               bitmap.close();
+              // Store mask for instant re-apply
+              maskStore.set(item.id, maskData);
               const blob = await applyBackground(maskData, bgMode, customColor);
               const resultUrl = URL.createObjectURL(blob);
               setImages((prev) => prev.map((img) => (img.id === item.id ? { ...img, status: "done" as const, progress: 100, resultUrl } : img)));
@@ -214,6 +235,38 @@ export default function BackgroundRemoverTool() {
     URL.revokeObjectURL(url);
   }, [images]);
 
+  // Export all 3 variants: transparent/ white/ custom/
+  const downloadAllVariants = useCallback(async () => {
+    const doneImages = images.filter((i) => i.status === "done");
+    const hasMasks = doneImages.some((i) => maskStore.has(i.id));
+    if (!hasMasks) return;
+
+    const zip = new JSZip();
+    const modes: { mode: BgMode; folder: string }[] = [
+      { mode: "transparent", folder: "transparent" },
+      { mode: "white", folder: "white" },
+      { mode: "custom", folder: "custom" },
+    ];
+
+    for (const img of doneImages) {
+      const mask = maskStore.get(img.id);
+      if (!mask) continue;
+      const baseName = img.file.name.replace(/\.[^.]+$/, "");
+      for (const { mode, folder } of modes) {
+        const blob = await applyBackground(mask, mode, customColor);
+        zip.file(`${folder}/${baseName}_nobg.png`, blob);
+      }
+    }
+
+    const content = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(content);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "batchbg_all_variants.zip";
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [images, customColor]);
+
   const downloadSingle = useCallback(async (img: ProcessedImage) => {
     if (!img.resultUrl) return;
     const a = document.createElement("a");
@@ -230,6 +283,7 @@ export default function BackgroundRemoverTool() {
     images.forEach((img) => {
       URL.revokeObjectURL(img.originalUrl);
       if (img.resultUrl) URL.revokeObjectURL(img.resultUrl);
+      maskStore.delete(img.id);
     });
     setImages([]);
   }, [images]);
@@ -248,7 +302,6 @@ export default function BackgroundRemoverTool() {
     return order[a.status] - order[b.status];
   });
 
-  // Savings counter: 30s per image manual removal
   const savedMinutes = completed > 0 ? Math.round((completed * 30) / 60) : 0;
 
   return (
@@ -305,7 +358,6 @@ export default function BackgroundRemoverTool() {
 
           <div className="flex-1" />
 
-          {/* Savings counter */}
           {completed > 0 && (
             <span className="text-sm text-green-400 font-semibold">
               ✓ Saved ~{savedMinutes} min ({completed} images)
@@ -327,9 +379,12 @@ export default function BackgroundRemoverTool() {
               {modelLoading ? "Loading model…" : `Processing ${completed}/${total}…`}
             </button>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={downloadZip}>
                 ⬇ ZIP ({completed})
+              </button>
+              <button className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg font-medium hover:bg-gray-600 transition-colors text-sm" onClick={downloadAllVariants} title="Export transparent + white + custom for all images">
+                All 3 ⬇
               </button>
               <button className="text-sm text-gray-400 hover:text-white px-2" onClick={clearAll}>Clear</button>
             </div>
