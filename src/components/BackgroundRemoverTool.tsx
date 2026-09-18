@@ -40,10 +40,21 @@ async function loadModel() {
 async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
   const s = await loadModel();
   const size = 320;
-  const canvas = new OffscreenCanvas(size, size);
-  const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(imageBitmap, 0, 0, size, size);
-  const imageData = ctx.getImageData(0, 0, size, size);
+
+  // Get full-resolution original data
+  const origCanvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+  const origCtx = origCanvas.getContext("2d")!;
+  origCtx.drawImage(imageBitmap, 0, 0);
+  const origData = origCtx.getImageData(0, 0, imageBitmap.width, imageBitmap.height);
+
+  // Detect dominant background color from corners (4 corners, 8x8 pixel samples)
+  const bgColor = detectBackgroundColor(origData, imageBitmap.width, imageBitmap.height);
+
+  // Run AI model for base mask
+  const smallCanvas = new OffscreenCanvas(size, size);
+  const smallCtx = smallCanvas.getContext("2d")!;
+  smallCtx.drawImage(imageBitmap, 0, 0, size, size);
+  const imageData = smallCtx.getImageData(0, 0, size, size);
   const float32Data = new Float32Array(3 * size * size);
   for (let i = 0; i < size * size; i++) {
     float32Data[i] = imageData.data[i * 4] / 255.0;
@@ -56,48 +67,92 @@ async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
   const results = await s.run(feeds);
   const output = results[s.outputNames[0]];
   const maskData = output.data as Float32Array;
+
   const maskImageData = new ImageData(imageBitmap.width, imageBitmap.height);
-  const origCanvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-  const origCtx = origCanvas.getContext("2d")!;
-  origCtx.drawImage(imageBitmap, 0, 0);
-  const origData = origCtx.getImageData(0, 0, imageBitmap.width, imageBitmap.height);
-  for (let y = 0; y < imageBitmap.height; y++) {
-    for (let x = 0; x < imageBitmap.width; x++) {
-      const srcX = (x / imageBitmap.width) * size;
-      const srcY = (y / imageBitmap.height) * size;
+  const w = imageBitmap.width, h = imageBitmap.height;
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const srcX = (x / w) * size;
+      const srcY = (y / h) * size;
       const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
       const x1 = Math.min(x0 + 1, size - 1), y1 = Math.min(y0 + 1, size - 1);
       const fx = srcX - x0, fy = srcY - y0;
       const val = maskData[y0 * size + x0] * (1 - fx) * (1 - fy) + maskData[y0 * size + x1] * fx * (1 - fy) + maskData[y1 * size + x0] * (1 - fx) * fy + maskData[y1 * size + x1] * fx * fy;
-      const alpha = Math.round(Math.max(0, Math.min(1, val)) * 255);
-      const idx = (y * imageBitmap.width + x) * 4;
+      let alpha = Math.max(0, Math.min(1, val));
+      const idx = (y * w + x) * 4;
+
+      // Chroma key refinement: boost AI mask with color distance from background
+      if (bgColor) {
+        const r = origData.data[idx], g = origData.data[idx + 1], b = origData.data[idx + 2];
+        const dist = Math.sqrt((r - bgColor.r) ** 2 + (g - bgColor.g) ** 2 + (b - bgColor.b) ** 2);
+        // If pixel is very close to background color, force it to be transparent
+        if (dist < 60) alpha = 0;
+        // If pixel is in the gray zone, blend AI mask with chroma key
+        else if (dist < 120) {
+          const chromaAlpha = (dist - 60) / 60; // 0 to 1
+          alpha = Math.min(alpha, chromaAlpha);
+        }
+        // If pixel is far from background, keep AI mask (it's foreground)
+      }
+
       maskImageData.data[idx] = origData.data[idx];
       maskImageData.data[idx + 1] = origData.data[idx + 1];
       maskImageData.data[idx + 2] = origData.data[idx + 2];
-      maskImageData.data[idx + 3] = alpha;
+      maskImageData.data[idx + 3] = Math.round(alpha * 255);
     }
   }
-  // Edge refinement: only sharpen alpha edges, do NOT modify RGB
-  // The previous orig/alpha formula over-saturated colors at low alpha.
-  // Safe approach: push semi-transparent alpha toward binary to reduce fringe.
-  const EDGE_LOW = 20;
-  const EDGE_HIGH = 235;
-  for (let y = 0; y < imageBitmap.height; y++) {
-    for (let x = 0; x < imageBitmap.width; x++) {
-      const idx = (y * imageBitmap.width + x) * 4;
-      const alpha = maskImageData.data[idx + 3];
-      if (alpha > EDGE_LOW && alpha < EDGE_HIGH) {
-        const a = alpha / 255;
-        // Gentle S-curve: push toward 0 or 1, preserve midtones
-        const curved = a < 0.5
-          ? Math.round(a * a * 2 * 255)
-          : Math.round((1 - 2 * (1 - a) * (1 - a)) * 255);
-        // Blend 50% original + 50% curved for subtlety
-        maskImageData.data[idx + 3] = Math.round(alpha * 0.5 + curved * 0.5);
+
+  // Edge refinement: gentle alpha S-curve on edges
+  const EDGE_LOW = 20, EDGE_HIGH = 235;
+  for (let i = 0; i < w * h; i++) {
+    const idx = i * 4;
+    const alpha = maskImageData.data[idx + 3];
+    if (alpha > EDGE_LOW && alpha < EDGE_HIGH) {
+      const a = alpha / 255;
+      const curved = a < 0.5 ? a * a * 2 : 1 - 2 * (1 - a) * (1 - a);
+      maskImageData.data[idx + 3] = Math.round(alpha * 0.5 + curved * 255 * 0.5);
+    }
+  }
+
+  return maskImageData;
+}
+
+/** Sample 4 corners to detect dominant background color */
+function detectBackgroundColor(data: ImageData, w: number, h: number): { r: number; g: number; b: number } | null {
+  const sampleSize = Math.min(20, Math.floor(w / 10), Math.floor(h / 10));
+  const corners = [
+    { sx: 0, sy: 0 },           // top-left
+    { sx: w - sampleSize, sy: 0 }, // top-right
+    { sx: 0, sy: h - sampleSize }, // bottom-left
+    { sx: w - sampleSize, sy: h - sampleSize }, // bottom-right
+  ];
+  let totalR = 0, totalG = 0, totalB = 0, count = 0;
+  const samples: { r: number; g: number; b: number }[] = [];
+
+  for (const { sx, sy } of corners) {
+    let cr = 0, cg = 0, cb = 0, cc = 0;
+    for (let dy = 0; dy < sampleSize; dy++) {
+      for (let dx = 0; dx < sampleSize; dx++) {
+        const idx = ((sy + dy) * w + (sx + dx)) * 4;
+        cr += data.data[idx]; cg += data.data[idx + 1]; cb += data.data[idx + 2];
+        cc++;
       }
     }
+    samples.push({ r: cr / cc, g: cg / cc, b: cb / cc });
+    totalR += cr; totalG += cg; totalB += cb; count += cc;
   }
-  return maskImageData;
+
+  // Check if all 4 corners are similar (uniform background)
+  const avg = { r: totalR / count, g: totalG / count, b: totalB / count };
+  const maxDist = Math.max(...samples.map(s =>
+    Math.sqrt((s.r - avg.r) ** 2 + (s.g - avg.g) ** 2 + (s.b - avg.b) ** 2)
+  ));
+
+  // If corners are uniform (maxDist < 40) and not white/gray/black (has color)
+  const isColorful = Math.abs(avg.r - avg.g) > 20 || Math.abs(avg.g - avg.b) > 20 || Math.abs(avg.r - avg.b) > 20;
+  if (maxDist < 40 && isColorful) return avg;
+  return null;
 }
 
 async function applyBackground(imageData: ImageData, mode: BgMode, customColor?: string): Promise<Blob> {
