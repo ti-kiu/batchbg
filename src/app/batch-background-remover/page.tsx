@@ -44,34 +44,21 @@ export default function BatchBackgroundRemover() {
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">What the Batch Queue Looks Like</h3>
           <div className="bg-card rounded-xl border border-line p-6 mb-6 not-prose">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div className="grid grid-cols-3 gap-3 mb-4">
               {[
                 { border: "border-green", label: "✓ Done", bg: "bg-green-bg", img: "/demo/watch.jpg" },
-                { border: "border-accent", label: "Processing…", bg: "bg-accent-bg", img: "/demo/product-after.jpg", spinner: true },
                 { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/sunglasses.jpg" },
                 { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/handbag.jpg" },
               ].map((card, i) => (
                 <div key={i} className={`rounded-lg border-2 ${card.border} ${card.bg} p-3 text-center`}>
                   <div className="w-full aspect-square rounded overflow-hidden mb-2 flex items-center justify-center" style={{background:'conic-gradient(#e5e5e5 25%,#f5f5f5 25% 50%,#e5e5e5 50% 75%,#f5f5f5 75%) 0 0/20px 20px'}}>
-                    {card.spinner ? (
-                      <div className="relative w-full h-full">
-                        <img src={card.img} alt="" className="w-full h-full object-cover opacity-60" />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <svg className="w-6 h-6 text-white animate-spin" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                          </svg>
-                        </div>
-                      </div>
-                    ) : (
-                      <img src={card.img} alt="" className="w-full h-full object-cover" />
-                    )}
+                    <img src={card.img} alt="" className="w-full h-full object-cover" />
                   </div>
                   <span className="text-xs font-semibold text-ink">{card.label}</span>
                 </div>
               ))}
             </div>
-            <p className="text-center text-sm text-sub font-mono">Batch: 1 done · 0 failed · 3 in queue</p>
+            <p className="text-center text-sm text-sub font-mono">Batch: 1 done · 0 failed · 2 in queue</p>
           </div>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">Step-by-Step: Process 100 Images in Under 5 Minutes</h3>
