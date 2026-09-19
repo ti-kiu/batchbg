@@ -7,8 +7,8 @@ export interface ProcessedImage {
   id: string;
   file: File;
   originalUrl: string;
-  resultUrls: Record<string, string>; // mode -> objectURL
-  previewMode: string; // which mode to show in grid
+  resultUrls: Record<string, string>;
+  previewMode: string;
   status: "queued" | "processing" | "done" | "error";
   progress: number;
   error?: string;
@@ -37,145 +37,125 @@ async function loadModel() {
   return session;
 }
 
+/**
+ * Mask post-processing v5 — fixes dark clothing / low-confidence region fog
+ * Ported from mask-postprocess.js + worker.js (verified 2026-09-19)
+ */
 async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
   const s = await loadModel();
-  const size = 320;
+  const SIZE = 320;
+  const N = SIZE * SIZE;
 
-  // Get full-resolution original data
-  const origCanvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-  const origCtx = origCanvas.getContext("2d")!;
-  origCtx.drawImage(imageBitmap, 0, 0);
-  const origData = origCtx.getImageData(0, 0, imageBitmap.width, imageBitmap.height);
+  // Prepare 320×320 input
+  const pc = new OffscreenCanvas(SIZE, SIZE);
+  const pctx = pc.getContext("2d", { willReadFrequently: true })!;
+  pctx.drawImage(imageBitmap, 0, 0, SIZE, SIZE);
+  const px = pctx.getImageData(0, 0, SIZE, SIZE).data;
 
-  // Detect dominant background color from corners (4 corners, 8x8 pixel samples)
-  const bgColor = detectBackgroundColor(origData, imageBitmap.width, imageBitmap.height);
-
-  // Run AI model for base mask
-  const smallCanvas = new OffscreenCanvas(size, size);
-  const smallCtx = smallCanvas.getContext("2d")!;
-  smallCtx.drawImage(imageBitmap, 0, 0, size, size);
-  const imageData = smallCtx.getImageData(0, 0, size, size);
-  const float32Data = new Float32Array(3 * size * size);
-  for (let i = 0; i < size * size; i++) {
-    float32Data[i] = imageData.data[i * 4] / 255.0;
-    float32Data[size * size + i] = imageData.data[i * 4 + 1] / 255.0;
-    float32Data[2 * size * size + i] = imageData.data[i * 4 + 2] / 255.0;
+  // CHW layout (raw 0-1, no ImageNet normalization)
+  const data = new Float32Array(3 * N);
+  for (let i = 0; i < N; i++) {
+    data[i] = px[i * 4] / 255;
+    data[N + i] = px[i * 4 + 1] / 255;
+    data[2 * N + i] = px[i * 4 + 2] / 255;
   }
-  const inputTensor = new ort.Tensor("float32", float32Data, [1, 3, size, size]);
+
+  const tensor = new ort.Tensor("float32", data, [1, 3, SIZE, SIZE]);
   const feeds: Record<string, any> = {};
-  feeds[s.inputNames[0]] = inputTensor;
+  feeds[s.inputNames[0]] = tensor;
   const results = await s.run(feeds);
-  const output = results[s.outputNames[0]];
-  const maskData = output.data as Float32Array;
+  const pred = results[s.outputNames[0]].data as Float32Array;
 
-  const maskImageData = new ImageData(imageBitmap.width, imageBitmap.height);
-  const w = imageBitmap.width, h = imageBitmap.height;
+  // === Post-processing v5 ===
+  // Step 0: min-max normalize
+  let lo = Infinity, hi = -Infinity;
+  for (let i = 0; i < N; i++) { const v = pred[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+  const span = (hi - lo) || 1e-8;
+  const a32 = new Float32Array(N);
+  for (let i = 0; i < N; i++) a32[i] = (pred[i] - lo) / span;
 
-  // For uniform backgrounds: chroma key is PRIMARY, AI only refines edges
-  // For normal photos: AI is PRIMARY
-  if (bgColor) {
-    // Chroma key primary mask
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        const idx = (y * w + x) * 4;
-        const r = origData.data[idx], g = origData.data[idx + 1], b = origData.data[idx + 2];
-        const dist = Math.sqrt((r - bgColor.r) ** 2 + (g - bgColor.g) ** 2 + (b - bgColor.b) ** 2);
+  const TH = 0.5, SOFT = 0.14, CDIST = 55;
 
-        let alpha: number;
-        if (dist < 50) {
-          alpha = 0; // Definitely background
-        } else if (dist < 100) {
-          alpha = (dist - 50) / 50; // Smooth transition
-        } else {
-          alpha = 1; // Definitely foreground
-        }
+  // Hard binary mask
+  const hard = new Uint8Array(N);
+  for (let i = 0; i < N; i++) hard[i] = a32[i] >= TH ? 1 : 0;
 
-        // Use AI mask to refine the edges (where chroma key is uncertain)
-        if (alpha > 0 && alpha < 1) {
-          const srcX = (x / w) * size, srcY = (y / h) * size;
-          const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
-          const x1 = Math.min(x0 + 1, size - 1), y1 = Math.min(y0 + 1, size - 1);
-          const fx = srcX - x0, fy = srcY - y0;
-          const aiAlpha = maskData[y0 * size + x0] * (1 - fx) * (1 - fy) + maskData[y0 * size + x1] * fx * (1 - fy) + maskData[y1 * size + x0] * (1 - fx) * fy + maskData[y1 * size + x1] * fx * fy;
-          // Blend: trust chroma key more, use AI for edge refinement
-          alpha = alpha * 0.7 + Math.max(0, Math.min(1, aiAlpha)) * 0.3;
-        }
+  // Step 1: Flood fill from edges — low-confidence connected to edge = background
+  const bg = new Uint8Array(N);
+  const st: number[] = [];
+  for (let x = 0; x < SIZE; x++) st.push(x, (SIZE - 1) * SIZE + x);
+  for (let y = 0; y < SIZE; y++) st.push(y * SIZE, y * SIZE + SIZE - 1);
+  while (st.length) {
+    const i = st.pop()!;
+    if (i < 0 || i >= N || bg[i] || hard[i]) continue;
+    bg[i] = 1;
+    const x = i % SIZE, y = (i - x) / SIZE;
+    if (x > 0) st.push(i - 1); if (x < SIZE - 1) st.push(i + 1);
+    if (y > 0) st.push(i - SIZE); if (y < SIZE - 1) st.push(i + SIZE);
+  }
 
-        maskImageData.data[idx] = origData.data[idx];
-        maskImageData.data[idx + 1] = origData.data[idx + 1];
-        maskImageData.data[idx + 2] = origData.data[idx + 2];
-        maskImageData.data[idx + 3] = Math.round(alpha * 255);
-      }
-    }
-  } else {
-    // Normal photo: AI mask primary, with edge refinement
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        const srcX = (x / w) * size, srcY = (y / h) * size;
-        const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
-        const x1 = Math.min(x0 + 1, size - 1), y1 = Math.min(y0 + 1, size - 1);
-        const fx = srcX - x0, fy = srcY - y0;
-        const val = maskData[y0 * size + x0] * (1 - fx) * (1 - fy) + maskData[y0 * size + x1] * fx * (1 - fy) + maskData[y1 * size + x0] * (1 - fx) * fy + maskData[y1 * size + x1] * fx * fy;
-        const alpha = Math.max(0, Math.min(1, val));
-        const idx = (y * w + x) * 4;
-        maskImageData.data[idx] = origData.data[idx];
-        maskImageData.data[idx + 1] = origData.data[idx + 1];
-        maskImageData.data[idx + 2] = origData.data[idx + 2];
-        maskImageData.data[idx + 3] = Math.round(alpha * 255);
+  // Step 2: Background reference color = median of bg low-confidence pixels
+  const rs: number[] = [], gs: number[] = [], bs: number[] = [];
+  for (let i = 0; i < N; i++) {
+    if (bg[i] && a32[i] < 0.3) { rs.push(px[i * 4]); gs.push(px[i * 4 + 1]); bs.push(px[i * 4 + 2]); }
+  }
+  const median = (a: number[]) => { a.sort((x, y) => x - y); return a[a.length >> 1] || 0; };
+  const BR = median(rs), BGc = median(gs), BB = median(bs);
+
+  // Step 3: Subject edge band = 8-connected neighbors of bg that are hard foreground
+  const edge = new Uint8Array(N);
+  for (let i = 0; i < N; i++) {
+    if (!bg[i]) continue;
+    const x = i % SIZE, y = (i - x) / SIZE;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE) {
+        const j = ny * SIZE + nx;
+        if (hard[j]) edge[j] = 1;
       }
     }
   }
 
-  // Edge refinement: gentle alpha S-curve on edges
-  const EDGE_LOW = 20, EDGE_HIGH = 235;
-  for (let i = 0; i < w * h; i++) {
-    const idx = i * 4;
-    const alpha = maskImageData.data[idx + 3];
-    if (alpha > EDGE_LOW && alpha < EDGE_HIGH) {
-      const a = alpha / 255;
-      const curved = a < 0.5 ? a * a * 2 : 1 - 2 * (1 - a) * (1 - a);
-      maskImageData.data[idx + 3] = Math.round(alpha * 0.5 + curved * 255 * 0.5);
-    }
+  const sstep = (e0: number, e1: number, x: number) => {
+    const k = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+    return k * k * (3 - 2 * k);
+  };
+
+  // Step 4: Compose final alpha
+  const fix = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const dr = px[i * 4] - BR, dg = px[i * 4 + 1] - BGc, db = px[i * 4 + 2] - BB;
+    const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+    if (bg[i]) fix[i] = dist < CDIST ? 0 : (a32[i] > TH ? sstep(TH + 0.05, TH + 0.3, a32[i]) : 0);
+    else if (a32[i] < TH) fix[i] = dist < 48 ? sstep(TH - SOFT, TH, a32[i]) : 1;
+    else if (edge[i] && dist < CDIST) fix[i] = 0;
+    else fix[i] = 0.5 + 0.5 * sstep(TH - SOFT, 1, a32[i]);
   }
 
-  return maskImageData;
-}
+  // Step 5: Write alpha to 320×320 canvas, upscale to full resolution
+  const mc = new OffscreenCanvas(SIZE, SIZE);
+  const mctx = mc.getContext("2d", { willReadFrequently: true })!;
+  const mimg = mctx.createImageData(SIZE, SIZE);
+  for (let i = 0; i < N; i++) mimg.data[i * 4 + 3] = Math.round(fix[i] * 255);
+  mctx.putImageData(mimg, 0, 0);
 
-/** Sample 4 corners to detect dominant background color */
-function detectBackgroundColor(data: ImageData, w: number, h: number): { r: number; g: number; b: number } | null {
-  const sampleSize = Math.min(20, Math.floor(w / 10), Math.floor(h / 10));
-  const corners = [
-    { sx: 0, sy: 0 },           // top-left
-    { sx: w - sampleSize, sy: 0 }, // top-right
-    { sx: 0, sy: h - sampleSize }, // bottom-left
-    { sx: w - sampleSize, sy: h - sampleSize }, // bottom-right
-  ];
-  let totalR = 0, totalG = 0, totalB = 0, count = 0;
-  const samples: { r: number; g: number; b: number }[] = [];
+  const W = imageBitmap.width, H = imageBitmap.height;
+  const rc = new OffscreenCanvas(W, H);
+  const rctx = rc.getContext("2d", { willReadFrequently: true })!;
+  rctx.drawImage(imageBitmap, 0, 0, W, H);
+  const rdata = rctx.getImageData(0, 0, W, H);
 
-  for (const { sx, sy } of corners) {
-    let cr = 0, cg = 0, cb = 0, cc = 0;
-    for (let dy = 0; dy < sampleSize; dy++) {
-      for (let dx = 0; dx < sampleSize; dx++) {
-        const idx = ((sy + dy) * w + (sx + dx)) * 4;
-        cr += data.data[idx]; cg += data.data[idx + 1]; cb += data.data[idx + 2];
-        cc++;
-      }
-    }
-    samples.push({ r: cr / cc, g: cg / cc, b: cb / cc });
-    totalR += cr; totalG += cg; totalB += cb; count += cc;
+  const sc = new OffscreenCanvas(W, H);
+  const sctx = sc.getContext("2d", { willReadFrequently: true })!;
+  sctx.imageSmoothingEnabled = true;
+  sctx.drawImage(mc, 0, 0, W, H);
+  const sdata = sctx.getImageData(0, 0, W, H);
+
+  for (let i = 0; i < W * H; i++) {
+    rdata.data[i * 4 + 3] = sdata.data[i * 4 + 3];
   }
 
-  // Check if all 4 corners are similar (uniform background)
-  const avg = { r: totalR / count, g: totalG / count, b: totalB / count };
-  const maxDist = Math.max(...samples.map(s =>
-    Math.sqrt((s.r - avg.r) ** 2 + (s.g - avg.g) ** 2 + (s.b - avg.b) ** 2)
-  ));
-
-  // If corners are uniform (maxDist < 40) and not white/gray/black (has color)
-  const isColorful = Math.abs(avg.r - avg.g) > 20 || Math.abs(avg.g - avg.b) > 20 || Math.abs(avg.r - avg.b) > 20;
-  if (maxDist < 40 && isColorful) return avg;
-  return null;
+  return rdata;
 }
 
 async function applyBackground(imageData: ImageData, mode: BgMode, customColor?: string): Promise<Blob> {
@@ -193,7 +173,6 @@ async function applyBackground(imageData: ImageData, mode: BgMode, customColor?:
   return canvas.convertToBlob({ type: "image/png" });
 }
 
-// Generate all selected variants from a mask
 async function generateVariants(mask: ImageData, modes: BgMode[], customColor?: string): Promise<Record<string, string>> {
   const urls: Record<string, string> = {};
   for (const mode of modes) {
@@ -221,7 +200,7 @@ export default function BackgroundRemoverTool() {
     setSelectedModes((prev) => {
       const next = new Set(prev);
       if (next.has(mode)) {
-        if (next.size === 1) return prev; // must keep at least one
+        if (next.size === 1) return prev;
         next.delete(mode);
       } else {
         next.add(mode);
@@ -246,7 +225,6 @@ export default function BackgroundRemoverTool() {
     setImages((prev) => [...prev, ...newImages]);
   }, [selectedModes]);
 
-  // Re-generate variants when modes or customColor changes (for already-done images)
   useEffect(() => {
     const doneImages = images.filter((i) => i.status === "done");
     if (doneImages.length === 0) return;
@@ -257,12 +235,9 @@ export default function BackgroundRemoverTool() {
         if (!mask) continue;
         const newUrls = await generateVariants(mask, [...selectedModes], customColor);
         if (cancelled) return;
-        // Revoke old URLs
         Object.values(img.resultUrls).forEach((u) => URL.revokeObjectURL(u));
         const newPreview = selectedModes.has(img.previewMode as BgMode) ? img.previewMode : [...selectedModes][0];
-        setImages((prev) =>
-          prev.map((i) => (i.id === img.id ? { ...i, resultUrls: newUrls, previewMode: newPreview } : i))
-        );
+        setImages((prev) => prev.map((i) => (i.id === img.id ? { ...i, resultUrls: newUrls, previewMode: newPreview } : i)));
       }
     })();
     return () => { cancelled = true; };
@@ -357,7 +332,6 @@ export default function BackgroundRemoverTool() {
 
   return (
     <div>
-      {/* Dropzone */}
       {images.length === 0 && (
         <div className="border-2 border-dashed border-blue rounded-xl bg-blue-bg/30 hover:bg-blue-bg/50 transition-colors cursor-pointer min-h-[40vh] flex flex-col items-center justify-center p-8 text-center" onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
           <svg className="w-16 h-16 text-sub mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
@@ -375,7 +349,6 @@ export default function BackgroundRemoverTool() {
       {/* @ts-ignore */}
       <input ref={folderInputRef} type="file" webkitdirectory="" className="hidden" onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }} />
 
-      {/* Action Bar */}
       {images.length > 0 && (
         <div className="bg-ink text-white rounded-xl p-4 mb-5 flex flex-wrap items-center gap-3">
           <span className="text-sm text-gray-300 font-semibold">Replace BG:</span>
@@ -386,17 +359,10 @@ export default function BackgroundRemoverTool() {
             </button>
           ))}
           {selectedModes.has("custom") && <input type="color" value={customColor} onChange={(e) => setCustomColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />}
-
           <div className="flex-1" />
-
-          {completed > 0 && (
-            <span className="text-sm text-green-400 font-semibold">✓ Saved ~{savedMinutes} min ({variantCount} files)</span>
-          )}
-
+          {completed > 0 && <span className="text-sm text-green-400 font-semibold">✓ Saved ~{savedMinutes} min ({variantCount} files)</span>}
           <span className="text-sm text-gray-300">{completed}/{total}{failed > 0 && <span className="text-red-400 ml-1">· {failed} fail</span>}</span>
-
           <button className="text-sm text-gray-400 hover:text-white transition-colors" onClick={() => fileInputRef.current?.click()}>+ Add</button>
-
           {completed === 0 && !isProcessing ? (
             <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={processQueue}>
               Remove Backgrounds{modeCount > 1 ? ` (${modeCount} modes)` : ""}
@@ -407,16 +373,13 @@ export default function BackgroundRemoverTool() {
             </button>
           ) : (
             <div className="flex gap-2 items-center">
-              <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={downloadZip}>
-                ⬇ ZIP ({variantCount})
-              </button>
+              <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={downloadZip}>⬇ ZIP ({variantCount})</button>
               <button className="text-sm text-gray-400 hover:text-white px-2" onClick={clearAll}>Clear</button>
             </div>
           )}
         </div>
       )}
 
-      {/* Results Grid */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {sortedImages.map((img) => {
@@ -429,7 +392,6 @@ export default function BackgroundRemoverTool() {
                   {img.status === "processing" && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" /></div>}
                   {img.status === "queued" && <div className="absolute inset-0 bg-black/10 flex items-center justify-center text-sub text-xs font-medium">Queued</div>}
                 </div>
-                {/* Variant tabs */}
                 {img.status === "done" && hasVariants && (
                   <div className="flex border-t border-line">
                     {Object.keys(img.resultUrls).map((mode) => (
