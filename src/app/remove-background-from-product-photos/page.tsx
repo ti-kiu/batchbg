@@ -145,6 +145,28 @@ export default function ProductPhotos() {
             A clean product cutout removes visual noise and lets the buyer focus on what matters: your product. Our AI handles complex edges — hair accessories, transparent packaging, reflective surfaces — and delivers clean masks that look professional on any background. The u2netp model achieves a mean Intersection over Union (IoU) of 0.89 on standard product photography, while BiRefNet reaches 0.94 on the same benchmark — comparable to manual Photoshop work at a fraction of the time. For sellers, this means every image in your catalog looks like it was shot in a professional studio, even if you photographed it on your kitchen table.
           </p>
 
+          <div className="grid sm:grid-cols-3 gap-4 mb-6 not-prose">
+            {[
+              { src: "/demo/product-after.jpg", label: "product-after.jpg" },
+              { src: "/demo/portrait-after.jpg", label: "portrait-after.jpg" },
+              { src: "/demo/camera-after.jpg", label: "camera-after.jpg" },
+            ].map((img, i) => (
+              <div key={i} className="rounded-2xl shadow-card overflow-hidden bg-card">
+                <div
+                  className="p-4"
+                  style={{
+                    backgroundImage: "conic-gradient(#e0e0e0 25%, #ffffff 25% 50%, #e0e0e0 50% 75%, #ffffff 75%)",
+                    backgroundSize: "16px 16px",
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.src} alt={img.label} className="w-full rounded-lg" />
+                </div>
+                <p className="text-center text-xs text-sub py-2 font-mono">{img.label}</p>
+              </div>
+            ))}
+          </div>
+
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">Product Photography Tips for Better Cutouts</h3>
           <ul className="text-sub text-sm space-y-2 mb-4">
             <li><span className="font-semibold text-ink">Use even lighting:</span> Harsh shadows on the background edge make AI segmentation harder. Diffused or two-point lighting produces the cleanest masks with minimal manual touchup.</li>

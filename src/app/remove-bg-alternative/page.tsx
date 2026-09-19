@@ -89,6 +89,28 @@ export default function RemoveBgAlternative() {
             </ol>
           </div>
 
+          <h3 className="font-heading text-xl font-semibold text-ink mb-3">Cost Comparison</h3>
+          <div className="space-y-3 mb-6 not-prose">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-semibold text-ink">remove.bg</span>
+                <span className="text-sm font-mono text-sub">$21–60/month</span>
+              </div>
+              <div className="w-full h-8 rounded-lg bg-red flex items-center px-4">
+                <span className="text-white text-xs font-semibold">300 images/mo × $0.07–$0.20 each</span>
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-semibold text-ink">BatchBG</span>
+                <span className="text-sm font-mono text-sub">$0 — forever</span>
+              </div>
+              <div className="w-24 h-8 rounded-lg bg-accent flex items-center justify-center">
+                <span className="text-white text-xs font-semibold">Free</span>
+              </div>
+            </div>
+          </div>
+
           <h3 className="font-heading text-xl font-semibold text-ink mb-3">BatchBG vs remove.bg: Feature Comparison</h3>
           <div className="bg-card rounded-xl border border-line overflow-hidden mb-6 not-prose">
             <table className="w-full text-sm">

@@ -67,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/remove-background-from-product-photos/" className="hover:text-ink transition-colors">Product Photos</a>
               <a href="/amazon-white-background/" className="hover:text-ink transition-colors">Amazon White BG</a>
               <a href="/remove-bg-alternative/" className="hover:text-ink transition-colors">remove.bg Alternative</a>
+              <a href="/blog/best-bulk-background-remover-2026/" className="hover:text-ink transition-colors">Blog</a>
             </div>
           </div>
         </nav>

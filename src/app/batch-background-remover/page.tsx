@@ -42,6 +42,33 @@ export default function BatchBackgroundRemover() {
             E-commerce sellers photograph entire product lines in one session — then face hours of manual background removal. BatchBG replaces that workflow with a single drag-and-drop. Drop your photo folder into the browser, click once, and download a ZIP of clean transparent PNGs. No Photoshop actions, no cloud uploads, no per-image billing.
           </p>
 
+          <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">What the Batch Queue Looks Like</h3>
+          <div className="bg-card rounded-xl border border-line p-6 mb-6 not-prose">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              {[
+                { border: "border-green", label: "✓ Done", bg: "bg-green-bg" },
+                { border: "border-accent", label: "Processing…", bg: "bg-accent-bg", spinner: true },
+                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50" },
+                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50" },
+              ].map((card, i) => (
+                <div key={i} className={`rounded-lg border-2 ${card.border} ${card.bg} p-3 text-center`}>
+                  <div className="w-full aspect-square rounded bg-white/60 mb-2 flex items-center justify-center">
+                    {card.spinner ? (
+                      <svg className="w-6 h-6 text-accent animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                    ) : (
+                      <span className="text-xs text-sub">IMG</span>
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-ink">{card.label}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-sm text-sub font-mono">Batch: 1 done · 0 failed · 3 in queue</p>
+          </div>
+
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">Step-by-Step: Process 100 Images in Under 5 Minutes</h3>
           <div className="bg-card rounded-xl border border-line p-6 mb-6 not-prose">
             <ol className="space-y-4 text-sm">

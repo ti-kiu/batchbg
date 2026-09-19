@@ -76,6 +76,28 @@ export default function AmazonWhiteBackground() {
             </div>
           </div>
 
+          <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">What Amazon&apos;s Audit Checks Look Like</h3>
+          <div className="grid sm:grid-cols-2 gap-4 mb-6 not-prose">
+            <div className="rounded-xl border-2 border-green p-5 bg-card">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-6 h-6 rounded-full bg-green text-white flex items-center justify-center text-sm font-bold">✓</span>
+                <span className="font-heading font-semibold text-green text-sm">AUDIT PASS</span>
+              </div>
+              <div className="space-y-1 text-sm font-mono text-sub">
+                <p>white 255 · fill 87% · 2000px</p>
+              </div>
+            </div>
+            <div className="rounded-xl border-2 border-red p-5 bg-card">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-6 h-6 rounded-full bg-red text-white flex items-center justify-center text-sm font-bold">✗</span>
+                <span className="font-heading font-semibold text-red text-sm">AUDIT FAIL</span>
+              </div>
+              <div className="space-y-1 text-sm font-mono text-sub">
+                <p>off-white #FEFEFE · fill 62% · 2000px</p>
+              </div>
+            </div>
+          </div>
+
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">How BatchBG Helps You Comply</h3>
           <p className="text-sub leading-relaxed mb-4">
             Select &quot;White&quot; background mode in BatchBG. The tool removes the original background and replaces it with pure RGB 255,255,255 white — the exact value Amazon&apos;s automated checker validates. No manual color picking, no Photoshop curves, no chance of being off by a few shades. A 2025 analysis by Helium 10 found that 23% of new seller listing rejections were due to non-compliant main images — the single most common preventable rejection.

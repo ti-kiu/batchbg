@@ -59,6 +59,38 @@
 }
 
 @layer components {
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+  }
+  th {
+    background: var(--color-accent);
+    color: white;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-line);
+    vertical-align: top;
+  }
+  td:first-child {
+    font-weight: 600;
+    color: var(--color-heading);
+  }
+  tr:nth-child(even) {
+    background: #f8fafc;
+  }
+  tr:hover {
+    background: #f0f4f8;
+  }
+
   .tag {
     display: inline-block;
     padding: 1px 8px;

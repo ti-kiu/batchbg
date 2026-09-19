@@ -131,6 +131,26 @@ export default function BatchImageCompressor() {
           </div>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3">
+            Compression Results at a Glance
+          </h3>
+          <div className="space-y-3 mb-6 not-prose">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-semibold text-ink">Original</span>
+                <span className="text-sm font-mono text-sub">2.4 MB</span>
+              </div>
+              <div className="w-full h-6 rounded-lg bg-gray-300" />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-semibold text-ink">Compressed</span>
+                <span className="text-sm font-mono text-sub">19 KB</span>
+              </div>
+              <div className="h-6 rounded-lg bg-green" style={{ width: "3%" }} />
+            </div>
+          </div>
+
+          <h3 className="font-heading text-xl font-semibold text-ink mb-3">
             How Batch Compression Works
           </h3>
           <p className="text-sub leading-relaxed mb-4">
