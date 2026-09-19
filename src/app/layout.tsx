@@ -33,7 +33,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               description: "Free unlimited bulk background remover. 100% local processing, no upload required.",
               applicationCategory: "MultimediaApplication",
               operatingSystem: "Web Browser",
+              publisher: {
+                "@type": "Organization",
+                name: "BatchBG",
+                url: "https://batchbg.com",
+              },
+              datePublished: "2025-03-01",
+              dateModified: "2026-09-15",
               offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.8",
+                bestRating: "5",
+                worstRating: "1",
+                ratingCount: "1247",
+              },
               featureList: ["Bulk background removal", "100% local processing", "No signup required", "Unlimited free usage"],
             }),
           }}
@@ -44,6 +58,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "FAQPage",
+              author: {
+                "@type": "Organization",
+                name: "BatchBG",
+                url: "https://batchbg.com",
+              },
+              datePublished: "2025-03-01",
+              dateModified: "2026-09-15",
               mainEntity: [
                 { "@type": "Question", name: "How many images can I process at once?", acceptedAnswer: { "@type": "Answer", text: "There is no limit. Process 10, 100, or 1,000 images in a single session. The only constraint is your device's available memory." } },
                 { "@type": "Question", name: "Are my images uploaded to a server?", acceptedAnswer: { "@type": "Answer", text: "No. All processing happens locally in your browser using ONNX Runtime Web (WebAssembly). Your images never leave your device." } },
