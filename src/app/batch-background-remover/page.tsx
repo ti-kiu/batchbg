@@ -32,7 +32,7 @@ export default function BatchBackgroundRemover() {
           <span className="inline-flex items-center gap-1.5 text-sm bg-success-bg text-success px-3 py-1.5 rounded-full font-medium">🏷 Original Filenames</span>
           <span className="inline-flex items-center gap-1.5 text-sm bg-success-bg text-success px-3 py-1.5 rounded-full font-medium">📦 ZIP Download</span>
         </div>
-        <BackgroundRemoverTool config={{ defaultBg: "transparent", showBatchStats: true, folderButton: true, label: "Start Batch Processing" }} />
+        <BackgroundRemoverTool config={{ mode: "batch", defaultBg: "transparent", showBatchStats: true, folderButton: true, label: "Start Batch Processing" }} />
       </section>
 
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

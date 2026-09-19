@@ -39,7 +39,7 @@ export default function RemoveBgAlternative() {
         <div className="max-w-lg mx-auto mb-6">
           <CompareSlider beforeSrc="/demo/portrait-before.jpg" afterSrc="/demo/portrait-after.jpg" />
         </div>
-        <BackgroundRemoverTool config={{ defaultBg: "transparent" }} />
+        <BackgroundRemoverTool config={{ mode: "quick", defaultBg: "transparent" }} />
       </section>
 
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
