@@ -20,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="google-site-verification" content="BcgXSHOsrKZGKJ2CkS9DXxujm4VFaJoG-aNDPigoJtI" />
         <script src="/assets/compliance.js"></script>
         <script defer data-domain="batchbg.com" src="https://plausible.io/js/script.js"></script>
         <script
