@@ -202,8 +202,8 @@ export default function Home() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/demo/portrait-after.jpg"
-                alt="Portrait cutout with clean edges on white background"
+                src="/demo/camera-after.jpg"
+                alt="Camera cutout with clean edges on white background"
                 className="w-full rounded-lg"
               />
             </div>
