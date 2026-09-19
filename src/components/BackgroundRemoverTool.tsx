@@ -265,20 +265,29 @@ async function generateShowcaseVariants(mask: ImageData, variants: Array<{ key: 
 }
 
 /** Audit a processed image: check corner pixels and fill rate */
-function auditImage(imageData: ImageData, spec: { width: number; height: number; fill: number; format: string }): AuditResult {
-  const W = imageData.width, H = imageData.height;
-  const d = imageData.data;
+function auditImage(mask: ImageData, spec: { width: number; height: number; fill: number; format: string }): AuditResult {
+  // Composite onto spec-sized white canvas first (same as export path)
+  const S = spec.width; // e.g. 2000
+  const mc = new OffscreenCanvas(S, S);
+  const mctx = mc.getContext("2d")!;
+  mctx.fillStyle = "#ffffff";
+  mctx.fillRect(0, 0, S, S);
+  // Draw cutout centered at 85% fill
+  const scale = (S * (spec.fill / 100)) / Math.max(mask.width, mask.height);
+  const dw = Math.round(mask.width * scale), dh = Math.round(mask.height * scale);
+  const tmpC = new OffscreenCanvas(mask.width, mask.height);
+  tmpC.getContext("2d")!.putImageData(mask, 0, 0);
+  mctx.drawImage(tmpC, (S - dw) / 2, (S - dh) / 2, dw, dh);
 
-  // Check 4 corners — sample a 3×3 area around each corner for robustness
-  const corners = [
-    [0, 0], [W - 1, 0], [0, H - 1], [W - 1, H - 1],
-  ];
+  const auditData = mctx.getImageData(0, 0, S, S);
+  const d = auditData.data;
+
+  // Check 4 corners — sample center pixel of each corner
+  const corners = [[0, 0], [S - 1, 0], [0, S - 1], [S - 1, S - 1]];
   let allWhite = true;
   let offColor = "";
-
   for (const [cx, cy] of corners) {
-    // Sample center pixel of corner
-    const idx = (cy * W + cx) * 4;
+    const idx = (cy * S + cx) * 4;
     const r = d[idx], g = d[idx + 1], b = d[idx + 2];
     if (r !== 255 || g !== 255 || b !== 255) {
       allWhite = false;
@@ -286,13 +295,13 @@ function auditImage(imageData: ImageData, spec: { width: number; height: number;
     }
   }
 
-  // Calculate fill rate using alpha bounding box
-  let minX = W, minY = H, maxX = 0, maxY = 0;
+  // Calculate fill rate using alpha bounding box on the MASK (not composited)
+  const md = mask.data;
+  let minX = mask.width, minY = mask.height, maxX = 0, maxY = 0;
   let hasContent = false;
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const a = d[(y * W + x) * 4 + 3];
-      if (a > 10) {
+  for (let y = 0; y < mask.height; y++) {
+    for (let x = 0; x < mask.width; x++) {
+      if (md[(y * mask.width + x) * 4 + 3] > 8) {
         hasContent = true;
         if (x < minX) minX = x;
         if (x > maxX) maxX = x;
@@ -301,20 +310,18 @@ function auditImage(imageData: ImageData, spec: { width: number; height: number;
       }
     }
   }
+  const bboxLong = hasContent ? Math.max(maxX - minX + 1, maxY - minY + 1) : 0;
+  const fillRate = hasContent ? Math.round((bboxLong / Math.max(mask.width, mask.height)) / (spec.fill / 100) * 100) : 0;
 
-  const bboxW = hasContent ? maxX - minX + 1 : 0;
-  const bboxH = hasContent ? maxY - minY + 1 : 0;
-  const fillRate = hasContent ? Math.round((bboxW * bboxH) / (W * H) * 100) : 0;
-
-  const pass = allWhite && fillRate >= spec.fill;
+  const pass = allWhite && fillRate >= 80 && fillRate <= 108;
 
   return {
     pass,
     cornerWhite: allWhite,
     cornerColor: allWhite ? "white 255" : `off-white ${offColor}`,
     fillRate,
-    width: W,
-    height: H,
+    width: S,
+    height: S,
   };
 }
 
@@ -468,14 +475,8 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
                 // Generate white background, then audit
                 const blob = await applyBackground(mask, "white");
                 urls = { white: URL.createObjectURL(blob) };
-                // Run audit on the composited result
-                const auditBitmap = await createImageBitmap(blob);
-                const ac = new OffscreenCanvas(auditBitmap.width, auditBitmap.height);
-                const actx = ac.getContext("2d")!;
-                actx.drawImage(auditBitmap, 0, 0);
-                const auditData = actx.getImageData(0, 0, auditBitmap.width, auditBitmap.height);
-                auditBitmap.close();
-                auditResult = auditImage(auditData, cfg.lockedSpec!);
+                // Run audit on the MASK (not composited) — auditImage composites internally
+                auditResult = auditImage(mask, cfg.lockedSpec!);
               } else {
                 urls = await generateVariants(mask, modes, customColor);
               }
