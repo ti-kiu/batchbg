@@ -77,19 +77,6 @@ function StepIcon({ type }: { type: string }) {
 export default function Home() {
   return (
     <>
-      {/* 1. Migration banner */}
-      <div className="bg-[#0F70E6] text-white text-center text-sm py-2.5 px-4">
-        <span className="font-medium">
-          remove.bg shuts down Dec 1 2026 —{" "}
-        </span>
-        <a
-          href="/remove-bg-alternative/"
-          className="underline underline-offset-2 font-semibold hover:opacity-90"
-        >
-          see the best alternative →
-        </a>
-      </div>
-
       {/* 2. Hero section */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-12 pb-16">
         <div className="bg-white rounded-2xl shadow-card p-8 sm:p-10 text-center">
