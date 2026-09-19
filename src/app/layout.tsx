@@ -101,6 +101,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <li><a href="/terms/" className="hover:text-ink">Terms of Service</a></li>
                 </ul>
               </div>
+              <div>
+                <h4 className="font-semibold text-ink mb-3">Blog</h4>
+                <ul className="space-y-2 text-sm text-sub">
+                  <li><a href="/blog/best-bulk-background-remover-2026/" className="hover:text-ink">Best Bulk BG Remover 2026</a></li>
+                  <li><a href="/blog/remove-bg-shutting-down-migration/" className="hover:text-ink">remove.bg Migration Guide</a></li>
+                </ul>
+              </div>
             </div>
             <div className="mt-8 pt-8 border-t border-line text-sm text-sub flex flex-col sm:flex-row justify-between items-center gap-4">
               <p>© {new Date().getFullYear()} BatchBG. All images processed locally on your device.</p>
