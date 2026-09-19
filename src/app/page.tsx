@@ -654,6 +654,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* From the blog */}
+      <section className="py-16 px-4 max-w-6xl mx-auto">
+        <h2 className="font-heading font-bold text-2xl text-ink mb-8 text-center">From the Blog</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <a href="/blog/best-bulk-background-remover-2026/" className="block bg-white rounded-xl p-6 border border-line hover:shadow-lg transition-shadow">
+            <p className="text-sm text-sub mb-2">September 18, 2026 · 8 min read</p>
+            <h3 className="font-heading font-semibold text-lg text-ink mb-2">Best Bulk Background Remover Tools in 2026 — Tested & Compared</h3>
+            <p className="text-sm text-sub">We tested 8 popular tools on 50 product photos. Real speed benchmarks, quality comparisons, and pricing breakdowns.</p>
+          </a>
+          <a href="/blog/remove-bg-shutting-down-migration/" className="block bg-white rounded-xl p-6 border border-line hover:shadow-lg transition-shadow">
+            <p className="text-sm text-sub mb-2">September 18, 2026 · 6 min read</p>
+            <h3 className="font-heading font-semibold text-lg text-ink mb-2">remove.bg Shutting Down: Your Complete Migration Guide</h3>
+            <p className="text-sm text-sub">remove.bg is closing December 1, 2026. How to migrate your workflow to free alternatives with zero downtime.</p>
+          </a>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <h2 className="text-2xl font-bold text-heading text-center mb-2">

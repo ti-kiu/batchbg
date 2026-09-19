@@ -34,6 +34,9 @@ export default function RemoveBgMigration() {
           ⚠ Time-Sensitive — Deadline: December 1, 2026
         </div>
         <p className="text-sub text-sm mb-2">September 18, 2026 · 6 min read</p>
+        <div className="mb-6 rounded-xl overflow-hidden">
+          <img src="/demo/portrait-after.jpg" alt="Portrait with background removed" className="w-full h-48 object-cover" loading="lazy" />
+        </div>
         <h1 className="font-heading font-bold text-3xl sm:text-4xl text-ink mb-4">
           remove.bg Shutting Down: Your Complete Migration Guide
         </h1>
@@ -107,7 +110,7 @@ curl -H "X-Api-Key: YOUR_KEY" \\
           The BatchBG API is planned for release in Q4 2026 — before the remove.bg shutdown. It will support the same parameters: image_file, image_url, size, type, format, and bg_color. Pricing will be free for standard usage with optional paid tiers for high-volume enterprise use. <a href="/remove-bg-alternative/" className="text-accent hover:underline">Sign up for API early access on the alternative page</a>.
         </p>
 
-        <h2 className="font-heading text-2xl font-bold text-ink mb-4 mt-8">Free Alternatives Comparison</h2>
+        <h2 className="font-heading text-2xl font-bold text-ink mb-4 mt-8"><a href="/blog/best-bulk-background-remover-2026/" className="text-accent hover:underline">Free Alternatives Comparison</a></h2>
         <p className="text-sub leading-relaxed mb-4">
           We evaluated every major alternative on price, batch support, privacy, and shutdown risk:
         </p>
@@ -172,7 +175,7 @@ curl -H "X-Api-Key: YOUR_KEY" \\
 
         <div className="bg-success-bg rounded-xl p-6 not-prose mb-8">
           <h3 className="font-heading font-semibold text-ink mb-2">Switch to BatchBG Today</h3>
-          <p className="text-sub text-sm mb-4">Free, unlimited, 100% local. No account, no credits, no shutdown risk. Test it with your existing product photos in 30 seconds.</p>
+          <p className="text-sub text-sm mb-4">Free, unlimited, 100% local. No account, no credits, no shutdown risk. Test it with <a href="/remove-background-from-product-photos/" className="text-accent hover:underline">your existing product photos</a> in 30 seconds.</p>
           <a href="/" className="inline-block bg-success text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-success/90 transition-colors">
             Try BatchBG Free →
           </a>
@@ -184,7 +187,7 @@ curl -H "X-Api-Key: YOUR_KEY" \\
             { q: "When exactly does remove.bg shut down?", a: "December 1, 2026 at 9:00 CET. After that, the website, API, desktop apps, mobile apps, and Photoshop plugin all stop functioning. Any unused credits expire with no refund." },
             { q: "Will my remove.bg account data be deleted?", a: "Yes. All processed images stored on remove.bg's servers will be deleted after shutdown. Export your processing history before December 1 using Dashboard → History → Download All." },
             { q: "Can I get a refund for unused credits?", a: "No. remove.bg's terms state that unused credits expire on the shutdown date with no refund. Process your backlog before December 1 to maximize the value of credits you've already paid for." },
-            { q: "Is Canva's built-in background remover a good replacement?", a: "It works for single images if you already pay for Canva Pro ($14.99/month). However, it has no batch processing, no API access, and requires uploading images to Canva's servers. For bulk workflows, BatchBG is a better fit." },
+            { q: "Is Canva's built-in background remover a good replacement?", a: "It works for single images if you already pay for Canva Pro ($14.99/month). However, it has no BATCH_PROCESSING_LINK, no API access, and requires uploading images to Canva's servers. For bulk workflows, BatchBG is a better fit." },
             { q: "Will the remove.bg API keep working after shutdown?", a: "No. All API endpoints (api.remove.bg/v1.0/removebg) will return HTTP 410 Gone after December 1, 2026. Canva is directing API users to Leonardo.ai, which uses a different request format and pricing model." },
             { q: "What is the fastest way to migrate 1,000+ images?", a: "Use your remaining remove.bg credits to process queued images now. For ongoing work, switch to BatchBG — it handles unlimited batch sizes with no per-image cost. Upload your folder, select background mode, click once, download a ZIP." },
           ].map((faq, i) => (
@@ -192,11 +195,15 @@ curl -H "X-Api-Key: YOUR_KEY" \\
               <summary className="font-heading font-semibold text-ink cursor-pointer list-none flex items-center justify-between">
                 {faq.q} <span className="text-sub group-open:rotate-180 transition-transform">▼</span>
               </summary>
-              <p className="text-sub text-sm mt-3 leading-relaxed">{faq.a}</p>
+              <p className="text-sub text-sm mt-3 leading-relaxed" dangerouslySetInnerHTML={{ __html: faq.a.replace("BATCH_PROCESSING_LINK", '<a href="/batch-background-remover/" class="text-accent hover:underline">batch processing</a>') }} />
             </details>
           ))}
         </div>
       </div>
+
+      <p className="text-sub mt-6">
+        <strong>Related:</strong> Want to compare all alternatives side by side? See our <a href="/blog/best-bulk-background-remover-2026/" className="text-accent hover:underline">2026 bulk background remover comparison</a>.
+      </p>
     </article>
   );
 }

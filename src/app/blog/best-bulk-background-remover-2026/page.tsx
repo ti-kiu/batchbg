@@ -31,6 +31,9 @@ export default function BestBulkBgRemover2026() {
       />
       <div className="mb-8">
         <p className="text-sub text-sm mb-2">September 18, 2026 · 8 min read</p>
+        <div className="mb-6 rounded-xl overflow-hidden">
+          <img src="/demo/product-after.jpg" alt="Product photo with background removed" className="w-full h-48 object-cover" loading="lazy" />
+        </div>
         <h1 className="font-heading font-bold text-3xl sm:text-4xl text-ink mb-4">
           Best Bulk Background Remover Tools in 2026 — Tested &amp; Compared
         </h1>
@@ -122,18 +125,26 @@ export default function BestBulkBgRemover2026() {
 
         <h2 className="font-heading text-2xl font-bold text-ink mb-4 mt-8">Key Findings</h2>
         <div className="space-y-6 mb-8 not-prose">
-          {[
-            { title: "Most 'free' tools limit batch size", body: "BgEraser caps at 20 images, Backgroundless at 40, Fotor at 50. Only BatchBG and batchtool.com offer truly unlimited batch processing for free. BatchRemover allows 1 free image — batch processing starts at $0.04/image." },
-            { title: "Cloud processing means your images leave your device", body: "6 of 8 tools upload your images to remote servers. For product photos containing unreleased designs, proprietary packaging, and pricing information, this is a privacy concern. BatchBG and batchtool.com process everything locally in the browser. Backgroundless.io also processes locally but charges a one-time fee." },
-            { title: "remove.bg is shutting down December 1, 2026", body: "The market leader — with 240M+ monthly search visits — is closing its standalone service. Its 10M monthly processed images need somewhere to go. This is a once-in-a-decade market disruption that will reshape the background removal landscape." },
-            { title: "Filename preservation matters more than you think", body: "Sellers name files by SKU or ASIN. Tools that rename files to random strings (BgEraser, Fotor) create hours of matching work. BatchBG preserves original filenames through to the ZIP download — a feature that sounds minor but saves significant time at scale." },
-            { title: "Edge quality varies more than marketing suggests", body: "We rated each tool's edge quality on a 1–5 scale across our test set. BatchBG HD (BiRefNet) and remove.bg HD scored highest at 4.3/5 and 4.5/5 respectively. Standard modes averaged 3.6–3.9/5 across all tools — closer than most marketing claims suggest." },
-          ].map((finding, i) => (
-            <div key={i} className="bg-card rounded-xl border border-line p-5">
-              <h3 className="font-heading font-semibold text-ink mb-2">{finding.title}</h3>
-              <p className="text-sub text-sm leading-relaxed">{finding.body}</p>
-            </div>
-          ))}
+          <div className="bg-card rounded-xl border border-line p-5">
+            <h3 className="font-heading font-semibold text-ink mb-2">Most &apos;free&apos; tools limit batch size</h3>
+            <p className="text-sub text-sm leading-relaxed">BgEraser caps at 20 images, Backgroundless at 40, Fotor at 50. Only BatchBG and batchtool.com offer truly unlimited batch processing for free. BatchRemover allows 1 free image — batch processing starts at $0.04/image.</p>
+          </div>
+          <div className="bg-card rounded-xl border border-line p-5">
+            <h3 className="font-heading font-semibold text-ink mb-2">Cloud processing means your images leave your device</h3>
+            <p className="text-sub text-sm leading-relaxed">6 of 8 tools upload your images to remote servers. For <a href="/amazon-white-background/" className="text-accent hover:underline">product photos containing unreleased designs</a>, proprietary packaging, and pricing information, this is a privacy concern. BatchBG and batchtool.com process everything locally in the browser. Backgroundless.io also processes locally but charges a one-time fee.</p>
+          </div>
+          <div className="bg-card rounded-xl border border-line p-5">
+            <h3 className="font-heading font-semibold text-ink mb-2">remove.bg is <a href="/blog/remove-bg-shutting-down-migration/" className="text-accent hover:underline">shutting down December 1, 2026</a></h3>
+            <p className="text-sub text-sm leading-relaxed">The market leader — with 240M+ monthly search visits — is closing its standalone service. Its 10M monthly processed images need somewhere to go. This is a once-in-a-decade market disruption that will reshape the background removal landscape.</p>
+          </div>
+          <div className="bg-card rounded-xl border border-line p-5">
+            <h3 className="font-heading font-semibold text-ink mb-2">Filename preservation matters more than you think</h3>
+            <p className="text-sub text-sm leading-relaxed">Sellers name files by SKU or ASIN. Tools that rename files to random strings (BgEraser, Fotor) create hours of matching work. BatchBG preserves original filenames through to the ZIP download — a feature that sounds minor but saves significant time at scale.</p>
+          </div>
+          <div className="bg-card rounded-xl border border-line p-5">
+            <h3 className="font-heading font-semibold text-ink mb-2">Edge quality varies more than marketing suggests</h3>
+            <p className="text-sub text-sm leading-relaxed">We rated each tool&apos;s edge quality on a 1–5 scale across our test set. BatchBG HD (BiRefNet) and remove.bg HD scored highest at 4.3/5 and 4.5/5 respectively. Standard modes averaged 3.6–3.9/5 across all tools — closer than most marketing claims suggest.</p>
+          </div>
         </div>
 
         <h2 className="font-heading text-2xl font-bold text-ink mb-4 mt-8">Quality Comparison: Edge Detail</h2>
@@ -202,13 +213,13 @@ export default function BestBulkBgRemover2026() {
 
         <h2 className="font-heading text-2xl font-bold text-ink mb-4 mt-8">Our Recommendation</h2>
         <p className="text-sub leading-relaxed mb-4">
-          For sellers who process product photos in bulk, we recommend a tool that checks three boxes: unlimited batch size, local processing (privacy), and zero per-image cost. Only two tools in our test met all three: BatchBG and batchtool.com. Both process images locally in the browser with no upload, no signup, and no limits.
+          For sellers who process product photos in bulk, we recommend <a href="/" className="text-accent hover:underline">a tool that checks three boxes</a>: unlimited batch size, local processing (privacy), and zero per-image cost. Only two tools in our test met all three: BatchBG and batchtool.com. Both process images locally in the browser with no upload, no signup, and no limits.
         </p>
         <p className="text-sub leading-relaxed mb-4">
-          BatchBG adds ZIP download with filename preservation, two AI model quality tiers (Standard and HD), background color selection (transparent, white, custom), and a planned API for developers. batchtool.com offers similar local processing but lacks ZIP download and filename preservation — features that matter when you are matching results back to your inventory system.
+          <a href="/batch-background-remover/" className="text-accent hover:underline">BatchBG adds ZIP download with filename preservation</a>, two AI model quality tiers (Standard and HD), background color selection (transparent, white, custom), and a planned API for developers. batchtool.com offers similar local processing but lacks ZIP download and filename preservation — features that matter when you are matching results back to your inventory system.
         </p>
         <p className="text-sub leading-relaxed mb-4">
-          If you need the absolute best edge quality and are willing to pay per image, remove.bg HD is still the gold standard — but only until December 1, 2026. After that, BatchBG HD (BiRefNet) is the closest free alternative.
+          If you need the absolute best edge quality and are willing to pay per image, remove.bg HD is still the gold standard — but only until December 1, 2026. After that, BatchBG HD (BiRefNet) is the <a href="/remove-bg-alternative/" className="text-accent hover:underline">closest free alternative</a>.
         </p>
 
         <div className="bg-success-bg rounded-xl p-6 not-prose mb-8">
@@ -238,6 +249,10 @@ export default function BestBulkBgRemover2026() {
           ))}
         </div>
       </div>
+
+      <p className="text-sub mt-6">
+        <strong>Related:</strong> If you're evaluating alternatives because remove.bg is shutting down, read our <a href="/blog/remove-bg-shutting-down-migration/" className="text-accent hover:underline">complete migration guide</a>.
+      </p>
     </article>
   );
 }
