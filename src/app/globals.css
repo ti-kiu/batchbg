@@ -3,19 +3,35 @@
 @source "../src";
 
 @theme {
-  --color-ink: #1a2332;
-  --color-sub: #5a6b80;
-  --color-line: #e3e8ef;
-  --color-bg: #f7f9fb;
+  /* accent */
+  --color-accent: #0F70E6;
+  --color-accent-hover: #0B5CC0;
+
+  /* text */
+  --color-ink: #0E1318;
+  --color-heading: #454545;
+  --color-body: #54616C;
+
+  /* surface */
+  --color-bg: #ffffff;
   --color-card: #ffffff;
+  --color-line: rgba(14, 19, 24, 0.08);
+  --shadow-card: 0 0 4px rgba(14, 19, 24, 0.07), 0 8px 24px rgba(14, 19, 24, 0.06);
+
+  /* radius */
+  --radius-btn: 6px;
+  --radius-card: 16px;
+
+  /* success (green only) */
   --color-green: #0e8a5f;
   --color-green-bg: #e6f5ef;
+
+  /* status */
   --color-red: #c0392b;
   --color-red-bg: #fbeeec;
   --color-amber: #b07a1a;
   --color-amber-bg: #fdf5e3;
-  --color-blue: #2563eb;
-  --color-blue-bg: #eaf1fd;
+
   --color-code: #f0f3f7;
 }
 
@@ -23,14 +39,21 @@
   * { box-sizing: border-box; }
 
   body {
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    color: var(--color-ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--color-body);
     background: var(--color-bg);
-    line-height: 1.65;
+    line-height: 1.7;
     font-size: 15px;
   }
 
-  h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+  h1, h2 {
+    color: var(--color-heading);
+    font-weight: 700;
+  }
+
+  h3, h4, h5, h6 {
+    font-weight: 700;
+  }
 
   details summary::-webkit-details-marker { display: none; }
 }
@@ -47,15 +70,10 @@
   .t-green { background: var(--color-green-bg); color: var(--color-green); }
   .t-red { background: var(--color-red-bg); color: var(--color-red); }
   .t-amber { background: var(--color-amber-bg); color: var(--color-amber); }
-  .t-blue { background: var(--color-blue-bg); color: var(--color-blue); }
 
   .checkerboard {
     background-image:
-      linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
-      linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
-      linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+      conic-gradient(#e0e0e0 25%, #ffffff 25% 50%, #e0e0e0 50% 75%, #ffffff 75%);
     background-size: 16px 16px;
-    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
   }
 }

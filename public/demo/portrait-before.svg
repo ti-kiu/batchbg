@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <rect width="600" height="400" fill="#FDE8E0"/>
+  <!-- Head and shoulders portrait -->
+  <g transform="translate(200, 30)">
+    <!-- Shoulders -->
+    <ellipse cx="100" cy="330" rx="140" ry="70" fill="#4A7AB5"/>
+    <!-- Neck -->
+    <rect x="70" y="240" width="60" height="50" rx="10" fill="#F0C8A0"/>
+    <!-- Head -->
+    <ellipse cx="100" cy="180" rx="75" ry="90" fill="#F0C8A0"/>
+    <!-- Hair -->
+    <ellipse cx="100" cy="130" rx="78" ry="60" fill="#3B2F2F"/>
+    <ellipse cx="100" cy="110" rx="72" ry="40" fill="#3B2F2F"/>
+    <!-- Eyes -->
+    <ellipse cx="75" cy="185" rx="10" ry="6" fill="white"/>
+    <ellipse cx="125" cy="185" rx="10" ry="6" fill="white"/>
+    <circle cx="76" cy="185" r="4" fill="#2C1810"/>
+    <circle cx="126" cy="185" r="4" fill="#2C1810"/>
+    <!-- Nose -->
+    <path d="M98 200 Q100 215 105 210" stroke="#D4A87C" stroke-width="2" fill="none"/>
+    <!-- Mouth -->
+    <path d="M82 225 Q100 238 118 225" stroke="#C0756B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Eyebrows -->
+    <path d="M62 172 Q75 165 88 172" stroke="#3B2F2F" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M112 172 Q125 165 138 172" stroke="#3B2F2F" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  <text x="300" y="380" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#666">Portrait — Before</text>
+</svg>
