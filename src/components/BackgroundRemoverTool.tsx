@@ -30,7 +30,37 @@ export type ToolMode = "batch" | "studio" | "audit" | "quick";
 const ALL_MODES: BgMode[] = ["transparent", "white", "custom"];
 const MODE_LABELS: Record<BgMode, string> = { transparent: "Transparent", white: "White", custom: "Custom" };
 
-/** Showcase variant definitions */
+/** Composite mask onto sized white canvas with bbox alignment (for audit/preset modes) */
+async function compositeWithBbox(mask: ImageData, S: number, fillPct: number): Promise<Blob> {
+  const mc = new OffscreenCanvas(S, S);
+  const ctx = mc.getContext("2d")!;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, S, S);
+  const md = mask.data;
+  const mW = mask.width, mH = mask.height;
+  let minX = mW, maxX = -1, minY = mH, maxY = -1;
+  for (let y = 0; y < mH; y++) for (let x = 0; x < mW; x++) {
+    if (md[(y * mW + x) * 4 + 3] > 8) {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+  }
+  const tmpC = new OffscreenCanvas(mW, mH);
+  tmpC.getContext("2d")!.putImageData(mask, 0, 0);
+  if (maxX < 0) {
+    ctx.drawImage(tmpC, (S - mW) / 2, (S - mH) / 2, mW, mH);
+  } else {
+    const bw = maxX - minX + 1, bh = maxY - minY + 1;
+    const k = S * (fillPct / 100) / Math.max(bw, bh);
+    const w = mW * k, h = mH * k;
+    const cx = S / 2 - (minX + bw / 2) * k;
+    const cy = S / 2 - (minY + bh / 2) * k;
+    ctx.drawImage(tmpC, cx, cy, w, h);
+  }
+  return new Promise(r => (mc as any).toBlob((b: Blob | null) => r(b!), "image/png"));
+}
+
+/** Studio variant definitions */
 const SHOWCASE_VARIANTS = [
   { key: "white", label: "Pure white", color: "#ffffff" },
   { key: "black", label: "Black", color: "#111111" },
@@ -264,26 +294,43 @@ async function generateShowcaseVariants(mask: ImageData, variants: Array<{ key: 
   return urls;
 }
 
-/** Audit a processed image: check corner pixels and fill rate */
+/** Audit a processed image: composite with bbox alignment, then check corners + fill rate */
 function auditImage(mask: ImageData, spec: { width: number; height: number; fill: number; format: string }): AuditResult {
-  // Composite onto spec-sized white canvas first (same as export path)
   const S = spec.width; // e.g. 2000
   const mc = new OffscreenCanvas(S, S);
   const mctx = mc.getContext("2d")!;
   mctx.fillStyle = "#ffffff";
   mctx.fillRect(0, 0, S, S);
-  // Draw cutout centered at 85% fill
-  const scale = (S * (spec.fill / 100)) / Math.max(mask.width, mask.height);
-  const dw = Math.round(mask.width * scale), dh = Math.round(mask.height * scale);
-  const tmpC = new OffscreenCanvas(mask.width, mask.height);
+
+  // Bbox alignment: measure alpha bbox on mask, scale bbox longest edge to fill×S
+  const md = mask.data;
+  const mW = mask.width, mH = mask.height;
+  let minX = mW, maxX = -1, minY = mH, maxY = -1;
+  for (let y = 0; y < mH; y++) for (let x = 0; x < mW; x++) {
+    if (md[(y * mW + x) * 4 + 3] > 8) {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+  }
+  const tmpC = new OffscreenCanvas(mW, mH);
   tmpC.getContext("2d")!.putImageData(mask, 0, 0);
-  mctx.drawImage(tmpC, (S - dw) / 2, (S - dh) / 2, dw, dh);
+
+  if (maxX < 0) {
+    mctx.drawImage(tmpC, (S - mW) / 2, (S - mH) / 2, mW, mH);
+  } else {
+    const bw = maxX - minX + 1, bh = maxY - minY + 1;
+    const k = S * (spec.fill / 100) / Math.max(bw, bh);
+    const w = mW * k, h = mH * k;
+    const cx = S / 2 - (minX + bw / 2) * k;
+    const cy = S / 2 - (minY + bh / 2) * k;
+    mctx.drawImage(tmpC, cx, cy, w, h);
+  }
 
   const auditData = mctx.getImageData(0, 0, S, S);
   const d = auditData.data;
 
-  // Check 4 corners — sample center pixel of each corner
-  const corners = [[0, 0], [S - 1, 0], [0, S - 1], [S - 1, S - 1]];
+  // Check 4 corners — sample 3px inset for robustness
+  const corners = [[3, 3], [S - 4, 3], [3, S - 4], [S - 4, S - 4]];
   let allWhite = true;
   let offColor = "";
   for (const [cx, cy] of corners) {
@@ -295,31 +342,28 @@ function auditImage(mask: ImageData, spec: { width: number; height: number; fill
     }
   }
 
-  // Calculate fill rate using alpha bounding box on the MASK (not composited)
-  const md = mask.data;
-  let minX = mask.width, minY = mask.height, maxX = 0, maxY = 0;
-  let hasContent = false;
-  for (let y = 0; y < mask.height; y++) {
-    for (let x = 0; x < mask.width; x++) {
-      if (md[(y * mask.width + x) * 4 + 3] > 8) {
-        hasContent = true;
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
+  // Fill rate: use "deviation from white < 246" on composited canvas (alpha is all 255)
+  const sN = 160;
+  const sc = new OffscreenCanvas(sN, sN);
+  const sctx = sc.getContext("2d")!;
+  sctx.drawImage(mc, 0, 0, sN, sN);
+  const sd = sctx.getImageData(0, 0, sN, sN).data;
+  let fMinX = sN, fMaxX = -1, fMinY = sN, fMaxY = -1;
+  for (let y = 0; y < sN; y++) for (let x = 0; x < sN; x++) {
+    const i = (y * sN + x) * 4;
+    if (sd[i] < 246 || sd[i + 1] < 246 || sd[i + 2] < 246) {
+      if (x < fMinX) fMinX = x; if (x > fMaxX) fMaxX = x;
+      if (y < fMinY) fMinY = y; if (y > fMaxY) fMaxY = y;
     }
   }
-  const bboxLong = hasContent ? Math.max(maxX - minX + 1, maxY - minY + 1) : 0;
-  const fillRate = hasContent ? Math.round((bboxLong / Math.max(mask.width, mask.height)) / (spec.fill / 100) * 100) : 0;
-
-  const pass = allWhite && fillRate >= 80 && fillRate <= 108;
+  const fill = fMaxX < 0 ? 0 : Math.round(Math.max(fMaxX - fMinX + 1, fMaxY - fMinY + 1) / sN / (spec.fill / 100) * 100);
+  const pass = allWhite && fill >= 80 && fill <= 108;
 
   return {
     pass,
     cornerWhite: allWhite,
     cornerColor: allWhite ? "white 255" : `off-white ${offColor}`,
-    fillRate,
+    fillRate: fill,
     width: S,
     height: S,
   };
@@ -472,10 +516,9 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
                 // Generate 4 studio variants with shadow
                 urls = await generateShowcaseVariants(mask, variantColors);
               } else if (isAudit) {
-                // Generate white background, then audit
-                const blob = await applyBackground(mask, "white");
+                // Composite with bbox alignment (same as audit)
+                const blob = await compositeWithBbox(mask, cfg.lockedSpec!.width, cfg.lockedSpec!.fill);
                 urls = { white: URL.createObjectURL(blob) };
-                // Run audit on the MASK (not composited) — auditImage composites internally
                 auditResult = auditImage(mask, cfg.lockedSpec!);
               } else {
                 urls = await generateVariants(mask, modes, customColor);
