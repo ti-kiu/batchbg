@@ -21,6 +21,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="google-site-verification" content="BcgXSHOsrKZGKJ2CkS9DXxujm4VFaJoG-aNDPigoJtI" />
+        <meta name="msvalidate.01" content="8D5AE51845CFE08F58F54A68CFF76D57" />
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-7F6QGW6TPS"
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-7F6QGW6TPS');
+            `,
+          }}
+        />
         <script src="/assets/compliance.js"></script>
         <script defer data-domain="batchbg.com" src="https://plausible.io/js/script.js"></script>
         <script
