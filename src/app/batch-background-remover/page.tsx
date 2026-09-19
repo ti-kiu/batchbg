@@ -46,20 +46,25 @@ export default function BatchBackgroundRemover() {
           <div className="bg-card rounded-xl border border-line p-6 mb-6 not-prose">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               {[
-                { border: "border-green", label: "✓ Done", bg: "bg-green-bg" },
-                { border: "border-accent", label: "Processing…", bg: "bg-accent-bg", spinner: true },
-                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50" },
-                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50" },
+                { border: "border-green", label: "✓ Done", bg: "bg-green-bg", img: "/demo/product-after.jpg" },
+                { border: "border-accent", label: "Processing…", bg: "bg-accent-bg", img: "/demo/portrait-before.jpg", spinner: true },
+                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/camera-after.jpg" },
+                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/portrait-after.jpg" },
               ].map((card, i) => (
                 <div key={i} className={`rounded-lg border-2 ${card.border} ${card.bg} p-3 text-center`}>
-                  <div className="w-full aspect-square rounded bg-white/60 mb-2 flex items-center justify-center">
+                  <div className="w-full aspect-square rounded overflow-hidden mb-2 flex items-center justify-center" style={{background:'conic-gradient(#e5e5e5 25%,#f5f5f5 25% 50%,#e5e5e5 50% 75%,#f5f5f5 75%) 0 0/20px 20px'}}>
                     {card.spinner ? (
-                      <svg className="w-6 h-6 text-accent animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                      </svg>
+                      <div className="relative w-full h-full">
+                        <img src={card.img} alt="" className="w-full h-full object-cover opacity-60" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <svg className="w-6 h-6 text-white animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                          </svg>
+                        </div>
+                      </div>
                     ) : (
-                      <span className="text-xs text-sub">IMG</span>
+                      <img src={card.img} alt="" className="w-full h-full object-cover" />
                     )}
                   </div>
                   <span className="text-xs font-semibold text-ink">{card.label}</span>
