@@ -142,7 +142,7 @@ export default function Home() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/demo/product-after.jpg"
+                src="/demo/product-after.jpg?v=2"
                 alt="Product cutout on transparent background"
                 className="w-full rounded-lg"
               />
