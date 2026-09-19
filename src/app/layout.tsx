@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Bulk Background Remover — Free, Unlimited, No Signup | BatchBG",
-  description: "Remove backgrounds from unlimited images at once. 100% local processing — your photos never leave your device. Free, fast, no signup.",
+  title: "Free Bulk Background Remover — No Signup | BatchBG",
+  description: "Remove backgrounds from unlimited product photos at once. 100% local processing in your browser — images never leave your device. Free, fast, no signup required.",
   keywords: "bulk background remover, batch background remover, remove backgrounds in bulk, free background remover",
   openGraph: {
-    title: "Bulk Background Remover — Free, Unlimited, No Signup",
-    description: "Remove backgrounds from unlimited images at once. 100% local, no upload, no signup.",
+    title: "Free Bulk Background Remover — No Signup",
+    description: "Remove backgrounds from unlimited product photos at once. 100% local, no upload, no signup.",
     url: "https://batchbg.com",
     siteName: "BatchBG",
     type: "website",
