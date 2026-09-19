@@ -141,6 +141,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </footer>
+        {/* Privacy notice banner */}
+        <div id="privacy-banner" className="fixed bottom-0 left-0 right-0 bg-white border-t border-line p-3 text-center text-xs text-sub z-50">
+          <p>
+            🔒 BatchBG processes images locally in your browser. We use Plausible Analytics (cookieless, privacy-friendly) for anonymous usage statistics.{" "}
+            <a href="/privacy/" className="text-accent hover:underline">Privacy Policy</a>
+          </p>
+        </div>
       </body>
     </html>
   );
