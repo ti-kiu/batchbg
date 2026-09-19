@@ -12,6 +12,23 @@ export const metadata: Metadata = {
 export default function BestBulkBgRemover2026() {
   return (
     <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: "Best Bulk Background Remover Tools in 2026 — Tested & Compared",
+            description: "We tested every major bulk background remover tool. See real speed benchmarks, quality comparisons, and pricing breakdowns.",
+            author: { "@type": "Organization", name: "BatchBG", url: "https://batchbg.com" },
+            publisher: { "@type": "Organization", name: "BatchBG", url: "https://batchbg.com" },
+            datePublished: "2026-09-18",
+            dateModified: "2026-09-19",
+            url: "https://batchbg.com/blog/best-bulk-background-remover-2026/",
+            mainEntityOfPage: "https://batchbg.com/blog/best-bulk-background-remover-2026/",
+          }),
+        }}
+      />
       <div className="mb-8">
         <p className="text-sub text-sm mb-2">September 18, 2026 · 8 min read</p>
         <h1 className="font-heading font-bold text-3xl sm:text-4xl text-ink mb-4">

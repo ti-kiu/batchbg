@@ -12,6 +12,23 @@ export const metadata: Metadata = {
 export default function RemoveBgMigration() {
   return (
     <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: "remove.bg Shutting Down: Your Complete Migration Guide",
+            description: "remove.bg is closing December 1, 2026. Here's how to migrate your workflow to free alternatives — with zero downtime.",
+            author: { "@type": "Organization", name: "BatchBG", url: "https://batchbg.com" },
+            publisher: { "@type": "Organization", name: "BatchBG", url: "https://batchbg.com" },
+            datePublished: "2026-09-18",
+            dateModified: "2026-09-19",
+            url: "https://batchbg.com/blog/remove-bg-shutting-down-migration/",
+            mainEntityOfPage: "https://batchbg.com/blog/remove-bg-shutting-down-migration/",
+          }),
+        }}
+      />
       <div className="mb-8">
         <div className="inline-flex items-center gap-2 bg-error-bg text-error px-3 py-1.5 rounded-full text-sm font-medium mb-3">
           ⚠ Time-Sensitive — Deadline: December 1, 2026

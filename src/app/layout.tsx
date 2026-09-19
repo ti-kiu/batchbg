@@ -102,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <li><a href="/" className="hover:text-ink">Bulk Background Remover</a></li>
                   <li><a href="/batch-background-remover/" className="hover:text-ink">Batch Background Remover</a></li>
                   <li><a href="/remove-background-from-product-photos/" className="hover:text-ink">Product Photo BG</a></li>
+                  <li><a href="/batch-image-compressor/" className="hover:text-ink">Batch Image Compressor</a></li>
                 </ul>
               </div>
               <div>
