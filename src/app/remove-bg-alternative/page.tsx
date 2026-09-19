@@ -21,9 +21,6 @@ export default function RemoveBgAlternative() {
     <>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 bg-error-bg text-error px-4 py-2 rounded-full text-sm font-medium mb-4">
-            ⚠ remove.bg shuts down December 1, 2026
-          </div>
           <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-ink mb-3">
             remove.bg Alternative
           </h1>
