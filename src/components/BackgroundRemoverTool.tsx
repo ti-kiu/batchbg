@@ -25,7 +25,7 @@ export interface AuditResult {
 }
 
 export type BgMode = "transparent" | "white" | "custom";
-export type ToolMode = "batch" | "showcase" | "audit" | "quick";
+export type ToolMode = "batch" | "studio" | "audit" | "quick";
 
 const ALL_MODES: BgMode[] = ["transparent", "white", "custom"];
 const MODE_LABELS: Record<BgMode, string> = { transparent: "Transparent", white: "White", custom: "Custom" };
@@ -194,7 +194,7 @@ async function applyBackground(imageData: ImageData, mode: BgMode, customColor?:
   return canvas.convertToBlob({ type: "image/png" });
 }
 
-/** Apply a solid color background with soft ground shadow (showcase mode) */
+/** Apply a solid color background with soft ground shadow (studio mode) */
 async function applyShowcaseBackground(imageData: ImageData, bgColor: string): Promise<Blob> {
   const W = imageData.width, H = imageData.height;
   const canvas = new OffscreenCanvas(W, H);
@@ -254,10 +254,10 @@ async function generateVariants(mask: ImageData, modes: BgMode[], customColor?: 
   return urls;
 }
 
-/** Generate 4 showcase variants with soft shadow */
-async function generateShowcaseVariants(mask: ImageData): Promise<Record<string, string>> {
+/** Generate studio variants with soft shadow */
+async function generateShowcaseVariants(mask: ImageData, variants: Array<{ key: string; label: string; color: string }>): Promise<Record<string, string>> {
   const urls: Record<string, string> = {};
-  for (const v of SHOWCASE_VARIANTS) {
+  for (const v of variants) {
     const blob = await applyShowcaseBackground(mask, v.color);
     urls[v.key] = URL.createObjectURL(blob);
   }
@@ -349,7 +349,7 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
   const mode = cfg.mode;
 
   // Derive effective settings from mode
-  const isShowcase = mode === "showcase";
+  const isShowcase = mode === "studio";
   const isAudit = mode === "audit";
   const isQuick = mode === "quick";
   const isBatch = mode === "batch";
@@ -366,6 +366,12 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
   const [customColor, setCustomColor] = useState("#0e8a5f");
   const [isProcessing, setIsProcessing] = useState(false);
   const [modelLoading, setModelLoading] = useState(false);
+  // Studio mode: editable variant colors
+  const [variantColors, setVariantColors] = useState<Array<{ key: string; label: string; color: string }>>(
+    isShowcase ? [...SHOWCASE_VARIANTS] : []
+  );
+  const [autoEnhance, setAutoEnhance] = useState(isShowcase);
+  const [autoFix, setAutoFix] = useState(isShowcase || isBatch);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
 
@@ -407,7 +413,7 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
   }, [selectedModes, isShowcase]);
 
   useEffect(() => {
-    if (isShowcase) return; // showcase has its own variant generation in processQueue
+    if (isShowcase) return; // studio has its own variant generation in processQueue
     const doneImages = images.filter((i) => i.status === "done");
     if (doneImages.length === 0) return;
     let cancelled = false;
@@ -456,8 +462,8 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
               let auditResult: AuditResult | undefined;
 
               if (isShowcase) {
-                // Generate 4 showcase variants with shadow
-                urls = await generateShowcaseVariants(mask);
+                // Generate 4 studio variants with shadow
+                urls = await generateShowcaseVariants(mask, variantColors);
               } else if (isAudit) {
                 // Generate white background, then audit
                 const blob = await applyBackground(mask, "white");
@@ -496,7 +502,7 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
         const resp = await fetch(url);
         const blob = await resp.blob();
         if (isShowcase) {
-          // showcase: sku-white.png, sku-black.png, sku-studio.png, sku-brand.png
+          // studio: sku-white.png, sku-black.png, sku-studio.png, sku-brand.png
           zip.file(`${baseName}-${key}.png`, blob);
         } else {
           const folder = modeCount > 1 ? `${key}/` : "";
@@ -507,7 +513,7 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
     const content = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(content);
-    a.download = isShowcase ? "batchbg_showcase_variants.zip" : modeCount > 1 ? "batchbg_all_variants.zip" : "batchbg_results.zip";
+    a.download = isShowcase ? "batchbg_studio_variants.zip" : modeCount > 1 ? "batchbg_all_variants.zip" : "batchbg_results.zip";
     a.click();
   }, [images, modeCount, isShowcase]);
 
@@ -539,7 +545,7 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
 
   const sortedImages = [...images].sort((a, b) => ({ done: 0, processing: 1, queued: 2, error: 3 }[a.status] - { done: 0, processing: 1, queued: 2, error: 3 }[b.status]));
   const savedMinutes = completed > 0 ? Math.round((completed * 30 * modeCount) / 60) : 0;
-  const variantCount = completed * (isShowcase ? 4 : modeCount);
+  const variantCount = completed * (isShowcase ? variantColors.length : modeCount);
 
   /* CTA label */
   const ctaLabel = cfg.label || "Remove Backgrounds";
@@ -570,10 +576,63 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
       {/* @ts-ignore */}
       <input ref={folderInputRef} type="file" webkitdirectory="" className="hidden" onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }} />
 
-      {/* Showcase variant info */}
+      {/* Studio: editable variant chips + auto-enhance/auto-fix toggles */}
       {isShowcase && images.length > 0 && (
-        <div className="text-sm text-sub text-center py-2 font-medium">
-          Variant 1: Pure white · Variant 2: Black · Variant 3: Warm studio · Variant 4: Brand blue
+        <div className="py-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
+            {variantColors.map((v, i) => (
+              <div key={i} className="flex items-center gap-1 bg-white rounded-full pl-1 pr-2 py-1 border border-line shadow-sm">
+                <input
+                  type="color"
+                  value={v.color}
+                  onChange={(e) => {
+                    const next = [...variantColors];
+                    next[i] = { ...next[i], color: e.target.value };
+                    setVariantColors(next);
+                  }}
+                  className="w-6 h-6 rounded-full cursor-pointer border-0"
+                />
+                <span className="text-xs text-body">{v.label}</span>
+                {variantColors.length > 1 && (
+                  <button
+                    onClick={() => setVariantColors(variantColors.filter((_, j) => j !== i))}
+                    className="text-gray-400 hover:text-red-500 text-xs ml-1"
+                  >×</button>
+                )}
+              </div>
+            ))}
+            {variantColors.length < 6 && (
+              <button
+                onClick={() => {
+                  const picker = document.createElement("input");
+                  picker.type = "color";
+                  picker.value = "#3b82f6";
+                  picker.addEventListener("input", (e) => {
+                    const color = (e.target as HTMLInputElement).value;
+                    setVariantColors(prev => [...prev, { key: `custom-${prev.length}`, label: color, color }]);
+                  });
+                  picker.click();
+                }}
+                className="flex items-center gap-1 bg-white rounded-full px-3 py-1 border border-dashed border-line text-xs text-body hover:border-accent cursor-pointer"
+              >+ Add variant</button>
+            )}
+          </div>
+          <div className="flex items-center justify-center gap-4 text-xs text-sub">
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input type="checkbox" checked={autoEnhance} onChange={(e) => setAutoEnhance(e.target.checked)} className="w-3 h-3" />
+              Auto-enhance (levels)
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Batch: auto-fix toggle */}
+      {isBatch && images.length > 0 && (
+        <div className="flex items-center justify-center gap-4 text-xs text-sub py-2">
+          <label className="flex items-center gap-1 cursor-pointer">
+            <input type="checkbox" checked={autoFix} onChange={(e) => setAutoFix(e.target.checked)} className="w-3 h-3" />
+            Auto-fix size & sharpness
+          </label>
         </div>
       )}
 
@@ -586,7 +645,7 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
 
       {images.length > 0 && (
         <div className="bg-ink text-white rounded-xl p-4 mb-5 flex flex-wrap items-center gap-3">
-          {/* Mode swatches — hidden when locked, showSwatches=false, or showcase/audit/quick */}
+          {/* Mode swatches — hidden when locked, showSwatches=false, or studio/audit/quick */}
           {!hideSwatches && !isShowcase && !isAudit && !isQuick && (
             <>
               <span className="text-sm text-gray-300 font-semibold">Replace BG:</span>
