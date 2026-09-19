@@ -47,7 +47,7 @@ export default function BatchBackgroundRemover() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               {[
                 { border: "border-green", label: "✓ Done", bg: "bg-green-bg", img: "/demo/watch.jpg" },
-                { border: "border-accent", label: "Processing…", bg: "bg-accent-bg", img: "/demo/headphones.jpg", spinner: true },
+                { border: "border-accent", label: "Processing…", bg: "bg-accent-bg", img: "/demo/product-after.jpg", spinner: true },
                 { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/sunglasses.jpg" },
                 { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/handbag.jpg" },
               ].map((card, i) => (
