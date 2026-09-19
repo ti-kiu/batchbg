@@ -11,145 +11,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://batchbg.com" },
 };
 
-function BeforeAfterSVG() {
-  return (
-    <svg
-      viewBox="0 0 560 260"
-      className="w-full max-w-md"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Before */}
-      <rect
-        x="10"
-        y="10"
-        width="240"
-        height="240"
-        rx="12"
-        stroke="#e3e8ef"
-        strokeWidth="2"
-        fill="white"
-      />
-      <text
-        x="130"
-        y="32"
-        textAnchor="middle"
-        fill="#54616C"
-        fontSize="11"
-        fontWeight="600"
-      >
-        BEFORE
-      </text>
-      {/* messy background lines */}
-      {Array.from({ length: 5 }).map((_, i) => (
-        <line
-          key={`bline-${i}`}
-          x1="30"
-          y1={60 + i * 40}
-          x2="230"
-          y2={60 + i * 40}
-          stroke="#e3e8ef"
-          strokeWidth="1"
-          strokeDasharray="4 4"
-        />
-      ))}
-      {/* product shoe shape */}
-      <path
-        d="M80 175 Q80 115 120 105 Q160 95 190 125 Q210 145 200 175 Q190 195 150 205 Q110 210 90 195 Z"
-        stroke="#1a2332"
-        strokeWidth="2"
-        fill="#f0f0f0"
-      />
-      <path
-        d="M100 165 Q110 140 135 130 Q160 125 175 140"
-        stroke="#1a2332"
-        strokeWidth="1.5"
-        fill="none"
-      />
-      {/* noise dots */}
-      {[40, 60, 80, 180, 200, 220, 50, 70, 190, 210].map((x, i) => (
-        <circle
-          key={`dot-${i}`}
-          cx={x}
-          cy={65 + (i % 4) * 42}
-          r="3"
-          fill="#e3e8ef"
-        />
-      ))}
+/* ── Shared styles ── */
 
-      {/* Arrow */}
-      <path
-        d="M265 130 L295 130"
-        stroke="#0e8a5f"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      <path
-        d="M288 120 L300 130 L288 140"
-        stroke="#0e8a5f"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+const checkerboardBg: React.CSSProperties = {
+  backgroundImage:
+    "conic-gradient(#e0e0e0 25%, #ffffff 25% 50%, #e0e0e0 50% 75%, #ffffff 75%)",
+  backgroundSize: "16px 16px",
+};
 
-      {/* After */}
-      <rect
-        x="310"
-        y="10"
-        width="240"
-        height="240"
-        rx="12"
-        stroke="#e3e8ef"
-        strokeWidth="2"
-        fill="white"
-      />
-      {/* checkerboard */}
-      {Array.from({ length: 8 }).map((_, r) =>
-        Array.from({ length: 8 }).map((_, c) => (
-          <rect
-            key={`${r}-${c}`}
-            x={325 + c * 27}
-            y={45 + r * 26}
-            width="27"
-            height="26"
-            fill={(r + c) % 2 === 0 ? "#f0f0f0" : "#fafafa"}
-          />
-        ))
-      )}
-      <text
-        x="430"
-        y="32"
-        textAnchor="middle"
-        fill="#0e8a5f"
-        fontSize="11"
-        fontWeight="600"
-      >
-        AFTER
-      </text>
-      {/* clean shoe cutout */}
-      <path
-        d="M380 175 Q380 115 420 105 Q460 95 490 125 Q510 145 500 175 Q490 195 450 205 Q410 210 390 195 Z"
-        stroke="#1a2332"
-        strokeWidth="2"
-        fill="white"
-      />
-      <path
-        d="M400 165 Q410 140 435 130 Q460 125 475 140"
-        stroke="#1a2332"
-        strokeWidth="1.5"
-        fill="none"
-      />
-      <circle cx="535" cy="225" r="11" fill="#0e8a5f" />
-      <path
-        d="M530 225 L533 228 L540 221"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+/* ── SVG icons for How It Works ── */
 
 function StepIcon({ type }: { type: string }) {
   const icons: Record<string, React.JSX.Element> = {
@@ -202,13 +72,15 @@ function StepIcon({ type }: { type: string }) {
   return icons[type] || null;
 }
 
+/* ── Page ── */
+
 export default function Home() {
   return (
     <>
-      {/* Migration banner */}
+      {/* 1. Migration banner */}
       <div className="bg-[#0F70E6] text-white text-center text-sm py-2.5 px-4">
         <span className="font-medium">
-          remove.bg shutting down Dec 1 2026 —{" "}
+          remove.bg shuts down Dec 1 2026 —{" "}
         </span>
         <a
           href="/remove-bg-alternative/"
@@ -218,52 +90,144 @@ export default function Home() {
         </a>
       </div>
 
-      {/* Two-column hero */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-          {/* Left column: headline + demo image */}
-          <div className="text-center lg:text-left">
-            <h1
-              className="text-4xl sm:text-5xl font-semibold tracking-tight leading-tight"
-              style={{ color: "#454545" }}
+      {/* 2. Hero section */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-12 pb-16">
+        <div className="bg-white rounded-2xl shadow-card p-8 sm:p-10 text-center">
+          <h1
+            className="text-4xl sm:text-5xl font-semibold tracking-tight leading-tight"
+            style={{ color: "#454545" }}
+          >
+            Bulk Background Remover
+          </h1>
+          <p className="text-body text-lg mt-4 max-w-lg mx-auto">
+            <span
+              className="inline-block text-white text-xs font-bold px-2 py-0.5 rounded mr-1 align-middle"
+              style={{ backgroundColor: "#0F70E6" }}
             >
-              Bulk Background
-              <br />
-              Remover
-            </h1>
-            <p className="text-body text-lg mt-4 max-w-lg mx-auto lg:mx-0">
-              <span className="inline-block bg-[#0F70E6] text-white text-xs font-bold px-2 py-0.5 rounded mr-1 align-middle">
-                free
-              </span>
-              unlimited, no signup. Remove backgrounds from hundreds of images
-              — 100% on your device.
-            </p>
-            <div className="mt-8">
-              <CompareSlider beforeSrc="/demo/portrait-before.jpg" afterSrc="/demo/portrait-after.jpg" />
-            </div>
+              free
+            </span>
+            unlimited, no signup. Remove backgrounds from hundreds of images
+            — 100% on your device.
+          </p>
+
+          <div className="mt-8">
+            <BackgroundRemoverTool />
           </div>
 
-          {/* Right column: tool card */}
-          <div className="bg-white rounded-2xl shadow-card p-10">
-            <BackgroundRemoverTool />
-            {/* Trust badges */}
-            <div className="flex flex-wrap justify-center gap-3 mt-6">
-              <span className="inline-flex items-center gap-1.5 bg-green-bg text-green text-xs font-semibold px-3 py-1.5 rounded-full">
-                🔒 Local — images never leave your device
-              </span>
-              <span className="inline-flex items-center gap-1.5 bg-green-bg text-green text-xs font-semibold px-3 py-1.5 rounded-full">
-                ♾ Unlimited Free
-              </span>
-              <span className="inline-flex items-center gap-1.5 bg-green-bg text-green text-xs font-semibold px-3 py-1.5 rounded-full">
-                🚫 No Signup
-              </span>
-            </div>
+          {/* Trust badges */}
+          <div className="flex flex-wrap justify-center gap-3 mt-6">
+            <span className="inline-flex items-center gap-1.5 bg-green-bg text-green text-xs font-semibold px-3 py-1.5 rounded-full">
+              Local — images never leave your device
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-green-bg text-green text-xs font-semibold px-3 py-1.5 rounded-full">
+              Unlimited Free
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-green-bg text-green text-xs font-semibold px-3 py-1.5 rounded-full">
+              No Signup
+            </span>
           </div>
         </div>
       </section>
 
+      {/* 3. Zigzag split sections */}
+      <div style={{ backgroundColor: "#f4f6f9" }}>
+        {/* Section A: Text LEFT + Image RIGHT */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="inline-block bg-[#0F70E6]/10 text-[#0F70E6] text-xs font-semibold px-3 py-1 rounded mb-4">
+                Bulk by design
+              </span>
+              <h2 className="text-3xl font-bold text-[#454545] mb-4">
+                One queue, one folder, one ZIP
+              </h2>
+              <p className="text-[#54616C] leading-relaxed">
+                Drop an entire folder of product photos and let the queue run.
+                No per-image credits, no upload limits, no waiting for
+                individual downloads. BatchBG processes every file in parallel
+                on your device and packages the results into a single ZIP —
+                filenames preserved, ready to re-upload.
+              </p>
+            </div>
+            <div
+              className="rounded-2xl shadow-card overflow-hidden p-4"
+              style={checkerboardBg}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/demo/product-after.jpg"
+                alt="Product cutout on transparent background"
+                className="w-full rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section B: Image LEFT + Text RIGHT */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div
+              className="rounded-2xl shadow-card overflow-hidden p-4 order-2 lg:order-1"
+              style={checkerboardBg}
+            >
+              <CompareSlider
+                beforeSrc="/demo/portrait-before.jpg"
+                afterSrc="/demo/portrait-after.jpg"
+              />
+            </div>
+            <div className="order-1 lg:order-2">
+              <span className="inline-block bg-[#0F70E6]/10 text-[#0F70E6] text-xs font-semibold px-3 py-1 rounded mb-4">
+                Private by architecture
+              </span>
+              <h2 className="text-3xl font-bold text-[#454545] mb-4">
+                Your images never leave your device
+              </h2>
+              <p className="text-[#54616C] leading-relaxed">
+                All inference runs locally in your browser via WebAssembly.
+                No server upload, no account required, no data collection.
+                The segmentation model loads once and stays on your machine —
+                a permanent free tool with no usage caps.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Section C: Text LEFT + Image RIGHT */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="inline-block bg-[#0F70E6]/10 text-[#0F70E6] text-xs font-semibold px-3 py-1 rounded mb-4">
+                Marketplace-ready
+              </span>
+              <h2 className="text-3xl font-bold text-[#454545] mb-4">
+                Amazon, Etsy, Shopify — one click
+              </h2>
+              <p className="text-[#54616C] leading-relaxed">
+                Built-in presets match platform requirements: 2000×2000px
+                canvas, pure white background, 85% frame fill. An automatic
+                pixel audit checks corner colors and fill rate before you
+                download — so listings pass on the first upload, every time.
+              </p>
+            </div>
+            <div
+              className="rounded-2xl shadow-card overflow-hidden p-4"
+              style={checkerboardBg}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/demo/portrait-after.jpg"
+                alt="Portrait cutout with clean edges on white background"
+                className="w-full rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Existing SEO content */}
+
       {/* Who Uses */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-2xl font-bold text-heading text-center mb-2">
           Who Uses BatchBG?
         </h2>
@@ -277,7 +241,7 @@ export default function Home() {
               E-Commerce
             </div>
             <h3 className="font-bold text-heading mb-2">
-              Amazon & Etsy Sellers
+              Amazon &amp; Etsy Sellers
             </h3>
             <p className="text-body text-sm leading-relaxed">
               Amazon requires pure white backgrounds (RGB 255,255,255) with the
@@ -308,7 +272,7 @@ export default function Home() {
               Photography
             </div>
             <h3 className="font-bold text-heading mb-2">
-              Photographers & Studios
+              Photographers &amp; Studios
             </h3>
             <p className="text-body text-sm leading-relaxed">
               Portrait photographers deliver cutouts for client headshots,
@@ -617,6 +581,16 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* 5. Footer */}
+      <footer className="bg-[#0E1318] text-white py-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-sm text-gray-400">
+            © {new Date().getFullYear()} BatchBG. Free, local, unlimited
+            background removal.
+          </p>
+        </div>
+      </footer>
     </>
   );
 }
