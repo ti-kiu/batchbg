@@ -32,7 +32,7 @@ export default function AmazonWhiteBackground() {
           <span className="inline-flex items-center gap-1.5 text-sm bg-success-bg text-success px-3 py-1.5 rounded-full font-medium">📦 Bulk Processing</span>
           <span className="inline-flex items-center gap-1.5 text-sm bg-success-bg text-success px-3 py-1.5 rounded-full font-medium">🔒 100% Local</span>
         </div>
-        <BackgroundRemoverTool />
+        <BackgroundRemoverTool config={{ defaultBg: "white", showSwatches: false, lockedSpec: { width: 2000, height: 2000, fill: 85, format: "JPEG" } }} />
       </section>
 
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

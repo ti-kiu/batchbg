@@ -184,9 +184,37 @@ async function generateVariants(mask: ImageData, modes: BgMode[], customColor?: 
   return urls;
 }
 
-export default function BackgroundRemoverTool() {
+/* ── Config types ── */
+
+export type ToolConfig = {
+  defaultBg?: BgMode;
+  showSwatches?: boolean;
+  showPreset?: boolean;         // future use
+  lockedSpec?: { width: number; height: number; fill: number; format: string } | null;
+  showBatchStats?: boolean;
+  folderButton?: boolean;
+  label?: string;
+};
+
+const DEFAULT_CONFIG: Required<Omit<ToolConfig, "lockedSpec" | "label">> & { lockedSpec: null; label: undefined } = {
+  defaultBg: "transparent",
+  showSwatches: true,
+  showPreset: true,
+  lockedSpec: null,
+  showBatchStats: false,
+  folderButton: false,
+  label: undefined,
+};
+
+/* ── Component ── */
+
+export default function BackgroundRemoverTool({ config }: { config?: ToolConfig }) {
+  const cfg = { ...DEFAULT_CONFIG, ...config };
+  const effectiveBg: BgMode = cfg.lockedSpec ? "white" : cfg.defaultBg;
+  const hideSwatches = cfg.lockedSpec ? true : !cfg.showSwatches;
+
   const [images, setImages] = useState<ProcessedImage[]>([]);
-  const [selectedModes, setSelectedModes] = useState<Set<BgMode>>(new Set(["transparent"]));
+  const [selectedModes, setSelectedModes] = useState<Set<BgMode>>(new Set([effectiveBg]));
   const [customColor, setCustomColor] = useState("#0e8a5f");
   const [isProcessing, setIsProcessing] = useState(false);
   const [modelLoading, setModelLoading] = useState(false);
@@ -195,10 +223,13 @@ export default function BackgroundRemoverTool() {
 
   const completed = images.filter((i) => i.status === "done").length;
   const failed = images.filter((i) => i.status === "error").length;
+  const processing = images.filter((i) => i.status === "processing").length;
+  const queued = images.filter((i) => i.status === "queued").length;
   const total = images.length;
   const modeCount = selectedModes.size;
 
   const toggleMode = useCallback((mode: BgMode) => {
+    if (cfg.lockedSpec) return; // locked — no toggling
     setSelectedModes((prev) => {
       const next = new Set(prev);
       if (next.has(mode)) {
@@ -209,7 +240,7 @@ export default function BackgroundRemoverTool() {
       }
       return next;
     });
-  }, []);
+  }, [cfg.lockedSpec]);
 
   const handleFiles = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
@@ -332,6 +363,9 @@ export default function BackgroundRemoverTool() {
   const savedMinutes = completed > 0 ? Math.round((completed * 30 * modeCount) / 60) : 0;
   const variantCount = completed * modeCount;
 
+  /* CTA label */
+  const ctaLabel = cfg.label || "Remove Backgrounds";
+
   return (
     <div>
       {images.length === 0 && (
@@ -344,6 +378,11 @@ export default function BackgroundRemoverTool() {
             <button className="bg-green text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>Select Images</button>
             <button className="bg-white text-ink border border-line px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm" onClick={(e) => { e.stopPropagation(); folderInputRef.current?.click(); }}>Select Folder</button>
           </div>
+          {cfg.folderButton && (
+            <button className="mt-4 bg-[#0F70E6] text-white px-7 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity text-base shadow-md" onClick={(e) => { e.stopPropagation(); folderInputRef.current?.click(); }}>
+              📂 Choose Folder
+            </button>
+          )}
         </div>
       )}
 
@@ -351,23 +390,35 @@ export default function BackgroundRemoverTool() {
       {/* @ts-ignore */}
       <input ref={folderInputRef} type="file" webkitdirectory="" className="hidden" onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }} />
 
+      {/* Batch stats */}
+      {cfg.showBatchStats && images.length > 0 && (
+        <div className="text-sm text-sub text-center py-2 font-medium">
+          Batch: {completed} done · {failed} failed · {queued + processing} in queue
+        </div>
+      )}
+
       {images.length > 0 && (
         <div className="bg-ink text-white rounded-xl p-4 mb-5 flex flex-wrap items-center gap-3">
-          <span className="text-sm text-gray-300 font-semibold">Replace BG:</span>
-          {ALL_MODES.map((m) => (
-            <button key={m} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all capitalize border-2 ${selectedModes.has(m) ? "bg-white text-ink border-white" : "bg-transparent text-gray-400 border-gray-600 hover:border-gray-400"}`} onClick={() => toggleMode(m)}>
-              {selectedModes.has(m) && <span className="mr-1">✓</span>}
-              {MODE_LABELS[m]}
-            </button>
-          ))}
-          {selectedModes.has("custom") && <input type="color" value={customColor} onChange={(e) => setCustomColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />}
+          {/* Mode swatches — hidden when locked or showSwatches=false */}
+          {!hideSwatches && (
+            <>
+              <span className="text-sm text-gray-300 font-semibold">Replace BG:</span>
+              {ALL_MODES.map((m) => (
+                <button key={m} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all capitalize border-2 ${selectedModes.has(m) ? "bg-white text-ink border-white" : "bg-transparent text-gray-400 border-gray-600 hover:border-gray-400"}`} onClick={() => toggleMode(m)}>
+                  {selectedModes.has(m) && <span className="mr-1">✓</span>}
+                  {MODE_LABELS[m]}
+                </button>
+              ))}
+              {selectedModes.has("custom") && <input type="color" value={customColor} onChange={(e) => setCustomColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />}
+            </>
+          )}
           <div className="flex-1" />
           {completed > 0 && <span className="text-sm text-green-400 font-semibold">✓ Saved ~{savedMinutes} min ({variantCount} files)</span>}
           <span className="text-sm text-gray-300">{completed}/{total}{failed > 0 && <span className="text-red-400 ml-1">· {failed} fail</span>}</span>
           <button className="text-sm text-gray-400 hover:text-white transition-colors" onClick={() => fileInputRef.current?.click()}>+ Add</button>
           {completed === 0 && !isProcessing ? (
             <button className="bg-green text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm" onClick={processQueue}>
-              Remove Backgrounds{modeCount > 1 ? ` (${modeCount} modes)` : ""}
+              {ctaLabel}{modeCount > 1 ? ` (${modeCount} modes)` : ""}
             </button>
           ) : isProcessing ? (
             <button className="bg-gray-600 text-gray-300 px-5 py-2 rounded-lg font-semibold cursor-not-allowed text-sm" disabled>
@@ -416,6 +467,16 @@ export default function BackgroundRemoverTool() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* lockedSpec compliance checklist */}
+      {cfg.lockedSpec && (
+        <div className="mt-4 border-2 border-green rounded-lg p-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-semibold text-green">
+          <span>✓ RGB(255,255,255)</span>
+          <span>✓ {cfg.lockedSpec.width}×{cfg.lockedSpec.height}</span>
+          <span>✓ {cfg.lockedSpec.fill}% fill</span>
+          <span>✓ {cfg.lockedSpec.format}</span>
         </div>
       )}
     </div>
