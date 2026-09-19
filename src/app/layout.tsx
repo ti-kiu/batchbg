@@ -23,6 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="google-site-verification" content="BcgXSHOsrKZGKJ2CkS9DXxujm4VFaJoG-aNDPigoJtI" />
         <meta name="msvalidate.01" content="8D5AE51845CFE08F58F54A68CFF76D57" />
         <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]function(){(c[a].q=c[a].q[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "ykzf7m51xt");`,
+          }}
+        />
+        <script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-7F6QGW6TPS"
         ></script>
