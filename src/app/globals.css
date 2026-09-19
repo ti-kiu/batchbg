@@ -19,7 +19,7 @@
   --shadow-card: 0 0 4px rgba(14, 19, 24, 0.07), 0 8px 24px rgba(14, 19, 24, 0.06);
 
   /* radius */
-  --radius-btn: 6px;
+  --radius-btn: 4px;
   --radius-card: 16px;
 
   /* success (green only) */
