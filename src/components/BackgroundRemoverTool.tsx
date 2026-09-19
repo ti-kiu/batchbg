@@ -29,7 +29,7 @@ async function loadModel() {
   ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/";
   const canMultiThread = typeof SharedArrayBuffer !== "undefined";
   ort.env.wasm.numThreads = canMultiThread ? Math.min(navigator.hardwareConcurrency - 1, 4) : 1;
-  const SESSION_TIMEOUT = 15000;
+  const SESSION_TIMEOUT = 120000;
   session = await Promise.race([
     ort.InferenceSession.create("/models/u2netp.onnx", { executionProviders: ["wasm"] }),
     new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Model load timed out")), SESSION_TIMEOUT)),
@@ -52,12 +52,14 @@ async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
   pctx.drawImage(imageBitmap, 0, 0, SIZE, SIZE);
   const px = pctx.getImageData(0, 0, SIZE, SIZE).data;
 
-  // CHW layout (raw 0-1, no ImageNet normalization)
+  // CHW layout with ImageNet normalization (u2netp training distribution)
+  const MEAN = [0.485, 0.456, 0.406];
+  const STD = [0.229, 0.224, 0.225];
   const data = new Float32Array(3 * N);
   for (let i = 0; i < N; i++) {
-    data[i] = px[i * 4] / 255;
-    data[N + i] = px[i * 4 + 1] / 255;
-    data[2 * N + i] = px[i * 4 + 2] / 255;
+    data[i] = (px[i * 4] / 255 - MEAN[0]) / STD[0];
+    data[N + i] = (px[i * 4 + 1] / 255 - MEAN[1]) / STD[1];
+    data[2 * N + i] = (px[i * 4 + 2] / 255 - MEAN[2]) / STD[2];
   }
 
   const tensor = new ort.Tensor("float32", data, [1, 3, SIZE, SIZE]);
