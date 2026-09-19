@@ -175,7 +175,7 @@ export default function BatchImageCompressor() {
             Compression vs. Background Removal: When to Use Each
           </h3>
           <p className="text-sub leading-relaxed mb-4">
-            Compression and background removal solve different problems. Compression shrinks file size while keeping the original photo intact — use it when your images are already well-lit, properly framed, and on the right background. Background removal replaces the original backdrop with white or transparent — use it when your product photos were taken on a colored, cluttered, or non-compliant background. For many sellers, the workflow is: remove the background first, then compress the result before uploading to the marketplace. BatchBG handles both steps.
+            Compression and <a href="/" className="text-accent hover:underline">background remover</a> tools solve different problems. Compression shrinks file size while keeping the original photo intact — use it when your images are already well-lit, properly framed, and on the right background. Background removal replaces the original backdrop with white or transparent — use it when your product photos were taken on a colored, cluttered, or non-compliant background. For many sellers, the workflow is: <a href="/batch-background-remover/" className="text-accent hover:underline">batch background removal</a> first, then compress the result before uploading to the marketplace. BatchBG handles both steps.
           </p>
         </article>
 

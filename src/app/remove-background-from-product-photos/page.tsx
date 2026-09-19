@@ -88,12 +88,12 @@ export default function ProductPhotos() {
             </div>
           </div>
           <p className="text-sub leading-relaxed mb-4">
-            Amazon rejects images that fail these checks — and suppressed listings lose search ranking within 24 hours. BatchBG&apos;s White mode outputs exactly RGB 255,255,255, matching Amazon&apos;s automated validation. No manual color picking, no off-by-one RGB errors.
+            Amazon rejects images that fail these checks — and suppressed listings lose search ranking within 24 hours. BatchBG&apos;s White mode outputs exactly RGB 255,255,255, matching Amazon&apos;s automated validation. See our <a href="/amazon-white-background/" className="text-accent hover:underline">Amazon white background</a> guide for full requirements.
           </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">Etsy &amp; Shopify Photo Tips</h3>
           <p className="text-sub leading-relaxed mb-4">
-            Etsy sellers benefit from lifestyle context — use BatchBG to remove the original background, then composite onto a styled scene using Canva or Figma. Etsy&apos;s algorithm favors images with warm, natural lighting and contextual props. Shopify product pages look best with consistent white or light-gray backgrounds across your entire catalog. Batch processing ensures every image in your store has the same visual treatment, which builds brand trust. A 2025 Shopify Merchants Report found that stores with consistent product imagery see 18% higher conversion rates than those with mixed visual styles.
+            Etsy sellers benefit from lifestyle context — use BatchBG to remove the original background, then composite onto a styled scene using Canva or Figma. Etsy&apos;s algorithm favors images with warm, natural lighting and contextual props. Shopify product pages look best with consistent white or light-gray backgrounds across your entire catalog. Using <a href="/batch-background-remover/" className="text-accent hover:underline">batch processing</a> ensures every image in your store has the same visual treatment, which builds brand trust. A 2025 Shopify Merchants Report found that stores with consistent product imagery see 18% higher conversion rates than those with mixed visual styles.
           </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">BatchBG vs Manual Editing: Time Comparison</h3>

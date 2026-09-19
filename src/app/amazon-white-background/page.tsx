@@ -39,7 +39,7 @@ export default function AmazonWhiteBackground() {
         <article className="prose prose-gray max-w-none">
           <h2 className="font-heading text-2xl font-bold text-ink mb-4">Amazon Product Image Requirements (2026)</h2>
           <p className="text-sub leading-relaxed mb-4">
-            Amazon&apos;s image guidelines are strict for a reason: consistent product photos build buyer trust and reduce returns. Getting them wrong means suppressed listings or rejection at upload. Amazon updated its image policy in Q1 2026 to enforce automated background-color validation — images with backgrounds above RGB 250,250,250 are now flagged and rejected before listing approval. Here is exactly what Amazon requires.
+            Amazon&apos;s image guidelines are strict for a reason: consistent product photos build buyer trust and reduce returns. Getting them wrong means suppressed listings or rejection at upload. Amazon updated its image policy in Q1 2026 to enforce automated background-color validation — images with backgrounds above RGB 250,250,250 are now flagged and rejected before listing approval. Here is exactly what Amazon requires — and how to handle <a href="/remove-background-from-product-photos/" className="text-accent hover:underline">product photo backgrounds</a>.
           </p>
 
           <div className="bg-card rounded-xl border border-line p-6 mb-6 not-prose">
@@ -100,7 +100,7 @@ export default function AmazonWhiteBackground() {
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">How BatchBG Helps You Comply</h3>
           <p className="text-sub leading-relaxed mb-4">
-            Select &quot;White&quot; background mode in BatchBG. The tool removes the original background and replaces it with pure RGB 255,255,255 white — the exact value Amazon&apos;s automated checker validates. No manual color picking, no Photoshop curves, no chance of being off by a few shades. A 2025 analysis by Helium 10 found that 23% of new seller listing rejections were due to non-compliant main images — the single most common preventable rejection.
+            Select &quot;White&quot; background mode in BatchBG. The tool removes the original background and replaces it with pure RGB 255,255,255 white — the exact value Amazon&apos;s automated checker validates. You can <a href="/batch-background-remover/" className="text-accent hover:underline">batch remove backgrounds</a> across your entire catalog. No manual color picking, no Photoshop curves, no chance of being off by a few shades. A 2025 analysis by Helium 10 found that 23% of new seller listing rejections were due to non-compliant main images — the single most common preventable rejection.
           </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">Step-by-Step: Make Amazon-Ready Photos</h3>

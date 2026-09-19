@@ -5,7 +5,7 @@ import CompareSlider from "@/components/CompareSlider";
 export const metadata: Metadata = {
   title: "Free Bulk Background Remover — No Signup | BatchBG",
   description:
-    "Remove backgrounds from unlimited product photos at once. 100% local processing in your browser — images never leave your device. Free, fast, no signup required.",
+    "Remove backgrounds from unlimited product photos at once. 100% local browser processing — images never leave your device. Free, no signup.",
   keywords:
     "bulk background remover, batch background remover, remove backgrounds in bulk, free background remover",
   alternates: { canonical: "https://batchbg.com" },
@@ -77,6 +77,23 @@ function StepIcon({ type }: { type: string }) {
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              { "@type": "Question", name: "How many images can I process at once?", acceptedAnswer: { "@type": "Answer", text: "There is no limit. Process 10, 100, or 1,000 images in a single session. The only constraint is your device's available memory. A typical laptop handles 200–300 images without issues." } },
+              { "@type": "Question", name: "Are my images uploaded to a server?", acceptedAnswer: { "@type": "Answer", text: "No. All processing happens locally in your browser using ONNX Runtime Web (WebAssembly). Your images never leave your device — not to our servers, not to any third party." } },
+              { "@type": "Question", name: "Is it really free? No watermarks?", acceptedAnswer: { "@type": "Answer", text: "Yes, completely free with no watermarks, no sign-up, and no per-image charges. Batch processing will always be free. There are no hidden limits, no trial periods, and no premium tier gating basic features." } },
+              { "@type": "Question", name: "What image formats are supported?", acceptedAnswer: { "@type": "Answer", text: "Input: JPG, JPEG, PNG, and WebP. Output is always PNG with a transparent alpha channel. You can also choose a solid white background for marketplace compliance." } },
+              { "@type": "Question", name: "How does this compare to remove.bg?", acceptedAnswer: { "@type": "Answer", text: "BatchBG is free and unlimited, while remove.bg charges $0.90–$1.99 per image and is shutting down December 1, 2026. We process everything locally — no uploads needed, no credits to buy." } },
+              { "@type": "Question", name: "Can I use the results commercially?", acceptedAnswer: { "@type": "Answer", text: "Yes. All processed images are yours to use however you like — Amazon listings, Etsy shops, Shopify stores, print-on-demand, marketing materials, client deliverables. There are no licensing restrictions on the output." } },
+            ],
+          }),
+        }}
+      />
       {/* 2. Hero section */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-12 pb-16">
         <div className="bg-white rounded-2xl shadow-card p-8 sm:p-10 text-center">

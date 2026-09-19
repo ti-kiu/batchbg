@@ -39,7 +39,7 @@ export default function BatchBackgroundRemover() {
         <article className="prose prose-gray max-w-none">
           <h2 className="font-heading text-2xl font-bold text-ink mb-4">How to Batch Remove Backgrounds from Product Photos</h2>
           <p className="text-sub leading-relaxed mb-4">
-            E-commerce sellers photograph entire product lines in one session — then face hours of manual background removal. BatchBG replaces that workflow with a single drag-and-drop. Drop your photo folder into the browser, click once, and download a ZIP of clean transparent PNGs. No Photoshop actions, no cloud uploads, no per-image billing.
+            E-commerce sellers photograph entire product lines in one session — then face hours of manual background removal. BatchBG replaces that workflow with a single drag-and-drop. Drop your photo folder into the browser, click once, and download a ZIP of clean transparent PNGs. No Photoshop actions, no cloud uploads, no per-image billing. Ideal for <a href="/remove-background-from-product-photos/" className="text-accent hover:underline">product photo editing</a> workflows.
           </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">What the Batch Queue Looks Like</h3>
@@ -82,7 +82,7 @@ export default function BatchBackgroundRemover() {
                 <span className="w-7 h-7 rounded-full bg-success text-white flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
                 <div>
                   <p className="font-semibold text-ink">Choose your background mode</p>
-                  <p className="text-sub mt-1">Transparent (default), White (RGB 255,255,255), or Custom color. White mode is ideal for Amazon compliance.</p>
+                  <p className="text-sub mt-1">Transparent (default), White (RGB 255,255,255), or Custom color. White mode is ideal for <a href="/amazon-white-background/" className="text-accent hover:underline">Amazon listing requirements</a>.</p>
                 </div>
               </li>
               <li className="flex gap-3">

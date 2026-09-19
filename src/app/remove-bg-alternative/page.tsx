@@ -171,7 +171,7 @@ export default function RemoveBgAlternative() {
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3">How to Migrate from remove.bg</h3>
           <p className="text-sub leading-relaxed mb-4">
-            If you were using remove.bg for product photo processing, switching to BatchBG takes 30 seconds: open batchbg.com, drop your images, click remove. No account, no API key, no credit card. The workflow is identical but with no per-image cost and no upload — your images stay on your device.
+            If you were using remove.bg for product photo processing, switching to BatchBG takes 30 seconds: open batchbg.com, drop your images, click remove. No account, no API key, no credit card — ideal for <a href="/batch-background-remover/" className="text-accent hover:underline">batch processing</a> at any scale. The workflow is identical but with no per-image cost and no upload — your images stay on your device. Perfect for creating <a href="/amazon-white-background/" className="text-accent hover:underline">Amazon-compliant photos</a>.
           </p>
           <p className="text-sub leading-relaxed mb-4">
             For API users, we are building a drop-in compatible API endpoint that accepts the same request format as remove.bg&apos;s v1.0 API. <a href="/blog/remove-bg-shutting-down-migration/" className="text-accent hover:underline">Read our full migration guide</a> for developers, including code samples and timeline.
