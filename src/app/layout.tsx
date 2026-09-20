@@ -118,7 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div>
-                <h4 className="font-semibold text-ink mb-3">Tools</h4>
+                <h3 className="font-semibold text-ink mb-3">Tools</h3>
                 <ul className="space-y-2 text-sm text-sub">
                   <li><a href="/" className="hover:text-ink">Bulk Background Remover</a></li>
                   <li><a href="/batch-background-remover/" className="hover:text-ink">Batch Background Remover</a></li>
@@ -127,26 +127,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-ink mb-3">E-Commerce</h4>
+                <h3 className="font-semibold text-ink mb-3">E-Commerce</h3>
                 <ul className="space-y-2 text-sm text-sub">
                   <li><a href="/amazon-white-background/" className="hover:text-ink">Amazon White Background</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-ink mb-3">Alternatives</h4>
+                <h3 className="font-semibold text-ink mb-3">Alternatives</h3>
                 <ul className="space-y-2 text-sm text-sub">
                   <li><a href="/remove-bg-alternative/" className="hover:text-ink">remove.bg Alternative</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-ink mb-3">Legal</h4>
+                <h3 className="font-semibold text-ink mb-3">Legal</h3>
                 <ul className="space-y-2 text-sm text-sub">
+                  <li><a href="/about/" className="hover:text-ink">About Us</a></li>
                   <li><a href="/privacy/" className="hover:text-ink">Privacy Policy</a></li>
                   <li><a href="/terms/" className="hover:text-ink">Terms of Service</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-ink mb-3">Blog</h4>
+                <h3 className="font-semibold text-ink mb-3">Blog</h3>
                 <ul className="space-y-2 text-sm text-sub">
                   <li><a href="/blog/best-bulk-background-remover-2026/" className="hover:text-ink">Best Bulk BG Remover 2026</a></li>
                   <li><a href="/blog/remove-bg-shutting-down-migration/" className="hover:text-ink">remove.bg Migration Guide</a></li>

@@ -113,6 +113,7 @@ export default function Home() {
             unlimited, no signup. Remove backgrounds from hundreds of images
             — 100% on your device.
           </p>
+          <p className="text-xs text-sub mt-2">Last updated: September 2026 · By BatchBG Team</p>
 
           <div className="mt-8">
             <BackgroundRemoverTool />
@@ -244,25 +245,27 @@ export default function Home() {
           <div className="text-center bg-card rounded-lg border border-line p-4">
             <div className="text-2xl font-bold text-[#0F70E6]">6.2 hrs</div>
             <p className="text-xs text-body mt-1">
-              Average weekly time sellers spend on image editing (Jungle Scout 2025)
+              Average weekly time sellers spend on image editing{" "}
+              <a href="https://www.junglescout.com/blog/ecommerce-trends/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs">(Jungle Scout 2025)</a>
             </p>
           </div>
           <div className="text-center bg-card rounded-lg border border-line p-4">
             <div className="text-2xl font-bold text-[#0F70E6]">12%</div>
             <p className="text-xs text-body mt-1">
-              Product listings rejected for non-compliant images (Amazon Seller Central)
+              Product listings rejected for non-compliant images{" "}
+              <a href="https://sellercentral.amazon.com/help/hub/reference/external/G202112960" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-xs">(Amazon Seller Central)</a>
             </p>
           </div>
           <div className="text-center bg-card rounded-lg border border-line p-4">
             <div className="text-2xl font-bold text-[#0F70E6]">0.89 IoU</div>
             <p className="text-xs text-body mt-1">
-              Segmentation accuracy of u2netp across 500 product image benchmarks
+              Segmentation accuracy of u2netp across 500 product image benchmarks (u2netp benchmark)
             </p>
           </div>
           <div className="text-center bg-card rounded-lg border border-line p-4">
             <div className="text-2xl font-bold text-[#0F70E6]">310ms</div>
             <p className="text-xs text-body mt-1">
-              Per-image inference time on standard hardware (WASM, WebAssembly)
+              Per-image inference time on standard hardware (u2netp benchmark)
             </p>
           </div>
         </div>
@@ -570,10 +573,12 @@ export default function Home() {
           <div className="border border-line rounded-lg p-5">
             <h3 className="font-bold text-heading mb-2">Privacy by Design</h3>
             <p className="text-body text-sm mb-3">
-              Every pixel processed in your browser using ONNX Runtime Web.
-              Zero bytes sent to any server. Your product photos — valuable
-              business assets — stay on your device. No AI training on your
-              data.
+            Every pixel processed in your browser using ONNX Runtime Web.
+            Zero bytes sent to any server. Your product photos — valuable
+            business assets — stay on your device. No AI training on your
+            data. According to{" "}
+            <a href="https://www.termsfeed.com/blog/privacy-laws/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">TermsFeed's 2025 privacy report</a>,
+            local-first processing eliminates the data-handling obligations that apply to cloud tools.
             </p>
             <div className="flex items-center gap-2">
               <div className="flex-1 bg-line rounded-full h-2">
