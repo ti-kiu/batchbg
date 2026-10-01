@@ -1,0 +1,290 @@
+# BatchBG - Complete Documentation
+
+## About BatchBG
+
+BatchBG is a free, privacy-first background removal and image processing tool. All processing happens locally in your browser using WebAssembly technology - your images never leave your device.
+
+## Core Features
+
+### 1. Background Removal
+Remove backgrounds from product photos, portraits, or any images with high precision using AI-powered segmentation.
+
+**Use Cases:**
+- E-commerce product photography
+- Social media content creation
+- Graphic design projects
+- Passport photos
+- Marketing materials
+
+### 2. Batch Processing
+Process multiple images simultaneously. Perfect for:
+- Product catalogs
+- Real estate photos
+- Event photography
+- Social media campaigns
+
+### 3. Image Compression
+Reduce file sizes while maintaining visual quality. Supports:
+- WebP conversion
+- Quality adjustment (1-100)
+- Batch compression
+
+## Technical Architecture
+
+### Processing Pipeline
+1. **Image Upload**: User selects image(s) via file input or drag-drop
+2. **Preprocessing**: Image normalization and validation
+3. **AI Segmentation**: U2-Net model identifies foreground/background
+4. **Postprocessing**: Edge refinement and alpha matting
+5. **Output Generation**: Transparent PNG or WebP export
+
+### Technology Stack
+- **Framework**: Next.js 14 (App Router)
+- **AI Runtime**: ONNX Runtime Web (WebAssembly)
+- **Model**: U2-Net (Universal Segmentation Network)
+- **Processing**: 100% client-side
+- **Privacy**: Zero server uploads, zero data collection
+
+## API Reference
+
+### POST /api/remove-bg
+
+Remove background from a single image.
+
+**Request:**
+```
+POST /api/remove-bg
+Content-Type: multipart/form-data
+
+image: <binary data>
+format: "png" | "webp" (optional, default: "png")
+```
+
+**Response:**
+- Success: Binary image data with transparent background
+- Error: JSON object with error message
+
+**Example:**
+```bash
+curl -X POST https://batchbg.com/api/remove-bg \
+  -F "image=@product.jpg" \
+  -F "format=png" \
+  --output result.png
+```
+
+### POST /api/batch-remove-bg
+
+Process multiple images in one request.
+
+**Request:**
+```
+POST /api/batch-remove-bg
+Content-Type: multipart/form-data
+
+images[]: <binary data> (multiple)
+format: "png" | "webp" (optional)
+```
+
+**Response:**
+- Success: ZIP file containing all processed images
+- Error: JSON object with error message
+
+**Example:**
+```bash
+curl -X POST https://batchbg.com/api/batch-remove-bg \
+  -F "images[]=@img1.jpg" \
+  -F "images[]=@img2.jpg" \
+  -F "images[]=@img3.jpg" \
+  --output results.zip
+```
+
+### POST /api/compress
+
+Compress image to reduce file size.
+
+**Request:**
+```
+POST /api/compress
+Content-Type: multipart/form-data
+
+image: <binary data>
+quality: 1-100 (optional, default: 85)
+```
+
+**Response:**
+- Success: Compressed image in WebP format
+- Error: JSON object with error message
+
+**Example:**
+```bash
+curl -X POST https://batchbg.com/api/compress \
+  -F "image=@large.jpg" \
+  -F "quality=80" \
+  --output compressed.webp
+```
+
+## Model Details
+
+### U2-Net Architecture
+- **Input**: RGB image (any size)
+- **Output**: Alpha matte (0-255)
+- **Precision**: FP32 (WebAssembly optimized)
+- **Inference Time**: ~2-5 seconds per image (depends on device)
+
+### Performance Optimization
+- **WebAssembly**: Near-native performance
+- **Web Workers**: Non-blocking UI
+- **Memory Management**: Automatic cleanup
+- **Progressive Loading**: Model loads on first use
+
+## Browser Compatibility
+
+### Supported Browsers
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+### Requirements
+- WebAssembly support
+- SharedArrayBuffer support
+- Modern browser APIs
+
+### Mobile Support
+- iOS Safari 14+
+- Android Chrome 90+
+- Mobile Firefox 88+
+
+## Privacy & Security
+
+### Data Handling
+- **Zero Uploads**: Images processed locally
+- **No Tracking**: No analytics or telemetry
+- **No Cookies**: No persistent storage
+- **No Accounts**: No registration required
+
+### Security Features
+- **Sandboxed Processing**: Isolated execution environment
+- **Input Validation**: File type and size checks
+- **Memory Safety**: WebAssembly memory boundaries
+- **No External Calls**: Zero network requests during processing
+
+## Rate Limits
+
+### Current Limits
+- **No API Keys Required**: Free for all users
+- **No Request Limits**: Process as many images as needed
+- **Browser-Based**: Limited only by device capabilities
+
+### Recommended Usage
+- Single images: < 10MB
+- Batch processing: < 50 images per batch
+- Browser memory: Monitor for large batches
+
+## Error Handling
+
+### Common Errors
+
+**400 Bad Request**
+- Missing image file
+- Invalid file format
+- File too large
+
+**413 Payload Too Large**
+- Image exceeds browser memory limits
+- Batch size too large
+
+**500 Internal Server Error**
+- Processing failure
+- Model loading error
+
+### Error Response Format
+```json
+{
+  "error": "Error message",
+  "code": "ERROR_CODE",
+  "details": "Additional information"
+}
+```
+
+## Integration Examples
+
+### JavaScript
+```javascript
+const formData = new FormData();
+formData.append('image', fileInput.files[0]);
+formData.append('format', 'png');
+
+const response = await fetch('/api/remove-bg', {
+  method: 'POST',
+  body: formData
+});
+
+const blob = await response.blob();
+const url = URL.createObjectURL(blob);
+```
+
+### Python
+```python
+import requests
+
+files = {'image': open('product.jpg', 'rb')}
+data = {'format': 'png'}
+
+response = requests.post(
+    'https://batchbg.com/api/remove-bg',
+    files=files,
+    data=data
+)
+
+with open('result.png', 'wb') as f:
+    f.write(response.content)
+```
+
+### cURL
+```bash
+curl -X POST https://batchbg.com/api/remove-bg \
+  -F "image=@product.jpg" \
+  -F "format=png" \
+  --output result.png
+```
+
+## Troubleshooting
+
+### Model Not Loading
+- Check browser console for errors
+- Ensure WebAssembly is enabled
+- Try refreshing the page
+- Clear browser cache
+
+### Processing Slow
+- Close other browser tabs
+- Reduce image size
+- Update browser to latest version
+- Check device performance
+
+### Memory Errors
+- Process smaller batches
+- Reduce image dimensions
+- Restart browser
+- Clear browser memory
+
+## Support
+
+### Contact
+- **Email**: support@batchbg.com
+- **Website**: https://batchbg.com
+- **Documentation**: https://batchbg.com/docs
+
+### Resources
+- **GitHub**: Source code and issues
+- **Community**: Discussions and feedback
+- **Updates**: Changelog and announcements
+
+## License
+
+BatchBG is open source software. See LICENSE file for details.
+
+---
+
+*Last updated: 2026-09-22*

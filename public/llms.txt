@@ -1,0 +1,75 @@
+# BatchBG
+
+> AI-powered background removal and image processing tool
+
+## Overview
+BatchBG is a free, privacy-first tool for removing backgrounds from images. All processing happens locally in your browser using WebAssembly - no images are uploaded to servers.
+
+## Features
+- **Single Image Processing**: Remove background from one image
+- **Batch Processing**: Process multiple images at once
+- **Image Compression**: Reduce file size while maintaining quality
+- **100% Local**: All processing in browser, no server uploads
+- **Free**: No registration required, unlimited usage
+
+## API Endpoints
+
+### POST /api/remove-bg
+Remove background from a single image.
+
+**Parameters:**
+- `image` (required): Image file (JPG, PNG, WebP)
+- `format` (optional): Output format, "png" or "webp" (default: "png")
+
+**Response:** Processed image with transparent background
+
+### POST /api/batch-remove-bg
+Remove backgrounds from multiple images.
+
+**Parameters:**
+- `images` (required): Array of image files
+- `format` (optional): Output format (default: "png")
+
+**Response:** ZIP file containing all processed images
+
+### POST /api/compress
+Compress image to reduce file size.
+
+**Parameters:**
+- `image` (required): Image file
+- `quality` (optional): Compression quality 1-100 (default: 85)
+
+**Response:** Compressed image in WebP format
+
+## Usage Examples
+
+```bash
+# Remove background from single image
+curl -X POST https://batchbg.com/api/remove-bg \
+  -F "image=@product.jpg" \
+  -F "format=png" \
+  --output result.png
+
+# Batch process multiple images
+curl -X POST https://batchbg.com/api/batch-remove-bg \
+  -F "images=@img1.jpg" \
+  -F "images=@img2.jpg" \
+  --output results.zip
+
+# Compress image
+curl -X POST https://batchbg.com/api/compress \
+  -F "image=@large.jpg" \
+  -F "quality=80" \
+  --output compressed.webp
+```
+
+## Technical Details
+
+- **Technology**: ONNX Runtime Web (WebAssembly)
+- **Model**: U2-Net for background segmentation
+- **Browser Support**: Chrome, Firefox, Safari, Edge (modern versions)
+- **Privacy**: Zero data collection, all processing local
+
+## Contact
+- Website: https://batchbg.com
+- Email: support@batchbg.com

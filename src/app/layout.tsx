@@ -102,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-line">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
             <a href="/" className="flex items-center gap-2">
+              <img src="/logo.svg" alt="BatchBG" width="32" height="32" className="flex-shrink-0" />
               <span className="font-bold text-xl text-ink">Batch<span className="text-green">BG</span></span>
             </a>
             <div className="hidden sm:flex items-center gap-6 text-sm text-sub">

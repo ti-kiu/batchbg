@@ -1,0 +1,7 @@
+{
+  "resource": "https://batchbg.com",
+  "authorization_servers": ["https://batchbg.com"],
+  "scopes_supported": ["read", "write"],
+  "bearer_methods_supported": ["header"],
+  "resource_documentation": "https://batchbg.com/docs/api"
+}

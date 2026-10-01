@@ -1,0 +1,81 @@
+{
+  "name": "BatchBG",
+  "description": "Batch background removal and image processing API",
+  "version": "1.0.0",
+  "protocolVersion": "2024-11-05",
+  "capabilities": {
+    "tools": {
+      "listChanged": true
+    },
+    "resources": {
+      "subscribe": false,
+      "listChanged": true
+    },
+    "prompts": {
+      "listChanged": true
+    }
+  },
+  "tools": [
+    {
+      "name": "remove-background",
+      "description": "Remove background from a single image",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "description": "Base64 encoded image or image URL"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["png", "webp"],
+            "description": "Output format"
+          }
+        },
+        "required": ["image"]
+      }
+    },
+    {
+      "name": "batch-remove-background",
+      "description": "Remove background from multiple images",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of base64 encoded images or URLs"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["png", "webp"],
+            "description": "Output format"
+          }
+        },
+        "required": ["images"]
+      }
+    },
+    {
+      "name": "compress-image",
+      "description": "Compress image to reduce file size",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "description": "Base64 encoded image or image URL"
+          },
+          "quality": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Compression quality (1-100)"
+          }
+        },
+        "required": ["image"]
+      }
+    }
+  ]
+}

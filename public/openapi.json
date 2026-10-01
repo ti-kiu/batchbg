@@ -1,0 +1,192 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BatchBG API",
+    "description": "AI-powered background removal and image processing API",
+    "version": "1.0.0",
+    "contact": {
+      "email": "support@batchbg.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://batchbg.com",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/api/remove-bg": {
+      "post": {
+        "operationId": "removeBackground",
+        "summary": "Remove background from image",
+        "description": "AI-powered background removal for a single image",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (JPG, PNG, WebP)"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": ["png", "webp"],
+                    "default": "png",
+                    "description": "Output format"
+                  }
+                },
+                "required": ["image"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Processed image with background removed",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/batch-remove-bg": {
+      "post": {
+        "operationId": "batchRemoveBackground",
+        "summary": "Batch remove backgrounds",
+        "description": "Remove backgrounds from multiple images",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "Multiple image files"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": ["png", "webp"],
+                    "default": "png"
+                  }
+                },
+                "required": ["images"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ZIP file containing processed images",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/compress": {
+      "post": {
+        "operationId": "compressImage",
+        "summary": "Compress image",
+        "description": "Compress image to reduce file size",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file"
+                  },
+                  "quality": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 85,
+                    "description": "Compression quality (1-100)"
+                  }
+                },
+                "required": ["image"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compressed image",
+            "content": {
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "code": {
+            "type": "string",
+            "description": "Error code"
+          }
+        }
+      }
+    }
+  }
+}

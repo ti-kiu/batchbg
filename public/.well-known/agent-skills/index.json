@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "skills": [
+    {
+      "name": "background-removal",
+      "description": "Remove backgrounds from images using AI",
+      "type": "skill-md",
+      "url": "https://batchbg.com/.well-known/agent-skills/background-removal/SKILL.md"
+    }
+  ]
+}

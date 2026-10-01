@@ -1,0 +1,27 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "BatchBG",
+    "identifier": "did:web:batchbg.com",
+    "description": "Batch background removal tool for images"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:batchbg.com:server:main",
+      "displayName": "BatchBG API",
+      "type": "application/mcp-server-card+json",
+      "url": "https://batchbg.com/.well-known/mcp/server-card.json",
+      "representativeQueries": [
+        "remove background from image",
+        "batch process multiple images",
+        "compress image file size"
+      ]
+    },
+    {
+      "identifier": "urn:air:batchbg.com:skill:background-removal",
+      "displayName": "Background Removal Skill",
+      "type": "application/skill.md+json",
+      "url": "https://batchbg.com/.well-known/agent-skills/background-removal/SKILL.md"
+    }
+  ]
+}
