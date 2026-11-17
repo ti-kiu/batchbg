@@ -113,7 +113,7 @@ export default function Home() {
             unlimited, no signup. Remove backgrounds from hundreds of images
             — 100% on your device.
           </p>
-          <p className="text-xs text-sub mt-2">Last updated: September 2026 · By BatchBG Team</p>
+          <p className="text-xs text-sub mt-2">Last updated: November 2026 · By BatchBG Team</p>
 
           <div className="mt-8">
             <BackgroundRemoverTool />
@@ -543,6 +543,21 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        <p className="text-body leading-relaxed">
+          When a whole folder of product photos needs backgrounds cleared in one pass, the{" "}
+          <a href="/batch-background-remover/" className="text-accent hover:underline">
+            Batch Background Remover
+          </a>{" "}
+          keeps the original SKU filenames and downloads a ZIP, with every image processed locally in the browser.
+          Teams that also need to review a catalog before it goes live can run{" "}
+          <a href="/bulk-background-screening/" className="text-accent hover:underline">
+            Bulk Background Screening
+          </a>{" "}
+          to flag leftover backdrops, rough edges, and shots that are not ready to publish.
+        </p>
+      </section>
+
       {/* Why Sellers Choose BatchBG */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-2xl font-bold text-heading text-center mb-8">
@@ -594,9 +609,12 @@ export default function Home() {
               remove.bg Alternative
             </h3>
             <p className="text-body text-sm mb-3">
-              remove.bg shuts down Dec 1, 2026. BatchBG is the free, unlimited
-              replacement that runs entirely in your browser — no credits, no
-              API keys, no vendor lock-in.
+              remove.bg shuts down Dec 1, 2026. After that date its standalone
+              site closes and the tool moves into Canva, with API users pointed
+              to Leonardo.ai — so workflows built on remove.bg&apos;s API need
+              a different plan. BatchBG is the free, unlimited replacement that
+              runs entirely in your browser — no credits, no API keys, no
+              vendor lock-in.
             </p>
             <a
               href="/remove-bg-alternative/"
@@ -686,7 +704,7 @@ export default function Home() {
             <p className="text-sm text-sub">We tested 8 popular tools on 50 product photos. Real speed benchmarks, quality comparisons, and pricing breakdowns.</p>
           </a>
           <a href="/blog/remove-bg-shutting-down-migration/" className="block bg-white rounded-xl p-6 border border-line hover:shadow-lg transition-shadow">
-            <p className="text-sm text-sub mb-2">September 18, 2026 · 6 min read</p>
+            <p className="text-sm text-sub mb-2">Updated November 13, 2026 · 6 min read</p>
             <h3 className="font-heading font-semibold text-lg text-ink mb-2">remove.bg Shutting Down: Your Complete Migration Guide</h3>
             <p className="text-sm text-sub">remove.bg is closing December 1, 2026. How to migrate your workflow to free alternatives with zero downtime.</p>
           </a>

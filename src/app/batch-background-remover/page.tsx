@@ -204,6 +204,7 @@ export default function BatchBackgroundRemover() {
               { "@type": "Question", name: "How do I upload a folder of images?", acceptedAnswer: { "@type": "Answer", text: "Click Select Folder or drag an entire folder into the drop zone. BatchBG reads all JPG, PNG, and WebP files including subfolders." } },
               { "@type": "Question", name: "What happens to my file names?", acceptedAnswer: { "@type": "Answer", text: "They are preserved exactly. SKU-001.jpg becomes SKU-001_nobg.png in the ZIP download." } },
               { "@type": "Question", name: "Is there a limit on batch size?", acceptedAnswer: { "@type": "Answer", text: "No hard limit. Process as many images as your device memory allows. Most laptops handle 100+ images without issues." } },
+              { "@type": "Question", name: "Can I add more images to a running batch?", acceptedAnswer: { "@type": "Answer", text: "Yes. Click '+ Add More' in the action bar to append more files to the current batch while processing is in progress." } },
               { "@type": "Question", name: "Which background mode should I use for Amazon?", acceptedAnswer: { "@type": "Answer", text: "Select White mode for Amazon main images. It outputs pure RGB 255,255,255 — the exact value Amazon's automated checker validates." } },
               { "@type": "Question", name: "Does it work offline?", acceptedAnswer: { "@type": "Answer", text: "After the first page load, the AI model is cached. Subsequent sessions work offline as long as browser cache is not cleared." } },
             ],
