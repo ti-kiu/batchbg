@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import CompressorTool from "@/components/CompressorTool";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 const faqData = [
   {
@@ -55,6 +56,7 @@ export default function BatchImageCompressor() {
 
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'Batch Image Compressor', url: 'https://batchbg.com/batch-image-compressor/' }]} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -175,7 +177,7 @@ export default function BatchImageCompressor() {
             Compression vs. Background Removal: When to Use Each
           </h3>
           <p className="text-sub leading-relaxed mb-4">
-            Compression and <a href="/" className="text-accent hover:underline">background remover</a> tools solve different problems. Compression shrinks file size while keeping the original photo intact — use it when your images are already well-lit, properly framed, and on the right background. Background removal replaces the original backdrop with white or transparent — use it when your product photos were taken on a colored, cluttered, or non-compliant background. For many sellers, the workflow is: <a href="/batch-background-remover/" className="text-accent hover:underline">batch background removal</a> first, then compress the result before uploading to the marketplace. BatchBG handles both steps.
+            Compression and <a href="/" className="text-accent hover:underline">background remover</a> tools solve different problems. Compression shrinks file size while keeping the original photo intact — use it when your images are already well-lit, properly framed, and on the right background. Background removal replaces the original backdrop with white or transparent — use it when your product photos were taken on a colored, cluttered, or non-compliant background. For many sellers, the workflow is: <a href="/bulk-background-remover/" className="text-accent hover:underline">batch background removal</a> first, then compress the result before uploading to the marketplace. If your photos also need new pixel dimensions, start with the <a href="/bulk-image-resizer/" className="text-accent hover:underline">bulk image resizer</a>, then compress here. BatchBG handles every step.
           </p>
         </article>
 

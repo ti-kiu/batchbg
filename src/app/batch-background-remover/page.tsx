@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import BackgroundRemoverTool from "@/components/BackgroundRemoverTool";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
-  title: "Batch Background Remover — Process an Entire Folder at Once | BatchBG",
+  title: "Batch Background Remover — Free, Unlimited, No Signup | BatchBG",
   description:
-    "Upload a folder of product photos and remove all backgrounds in one batch. Free, unlimited, 100% local processing. Download results as a ZIP.",
+    "Remove backgrounds from unlimited images in one batch — free, no signup, no per-image fee. Folder upload, original filenames kept, ZIP download. Runs 100% in your browser.",
   keywords:
-    "batch background remover, batch remove background, remove background from multiple images, folder background remover",
-  alternates: { canonical: "https://batchbg.com/batch-background-remover/" },
+    "batch background remover, batch remove background, remove background from multiple images, folder background remover, free batch background remover",
+  alternates: { canonical: "https://batchbg.com/bulk-background-remover/" },
   openGraph: {
-    title: "Batch Background Remover — Process an Entire Folder at Once",
-    description: "Upload a folder of product photos and remove all backgrounds in one batch. Free, unlimited, local.",
+    title: "Batch Background Remover — Free, Unlimited, No Signup",
+    description: "Unlimited images in one batch. Folder upload, ZIP download, 100% local. Free, no signup.",
     url: "https://batchbg.com/batch-background-remover/",
   },
 };
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 export default function BatchBackgroundRemover() {
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'Batch Background Remover', url: 'https://batchbg.com/batch-background-remover/' }]} />
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
         <div className="text-center mb-6">
           <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-ink mb-3">
@@ -46,13 +48,13 @@ export default function BatchBackgroundRemover() {
           <div className="bg-card rounded-xl border border-line p-6 mb-6 not-prose">
             <div className="grid grid-cols-3 gap-3 mb-4">
               {[
-                { border: "border-green", label: "✓ Done", bg: "bg-green-bg", img: "/demo/watch.jpg" },
-                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/sunglasses.jpg" },
-                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/handbag.jpg" },
+                { border: "border-green", label: "✓ Done", bg: "bg-green-bg", img: "/demo/watch.jpg", alt: "Smartwatch product photo with background removed" },
+                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/sunglasses.jpg", alt: "Sunglasses product photo queued for background removal" },
+                { border: "border-gray-300", label: "Queued", bg: "bg-gray-50", img: "/demo/handbag.jpg", alt: "Handbag product photo queued for background removal" },
               ].map((card, i) => (
                 <div key={i} className={`rounded-lg border-2 ${card.border} ${card.bg} p-3 text-center`}>
                   <div className="w-full aspect-square rounded overflow-hidden mb-2 flex items-center justify-center" style={{background:'conic-gradient(#e5e5e5 25%,#f5f5f5 25% 50%,#e5e5e5 50% 75%,#f5f5f5 75%) 0 0/20px 20px'}}>
-                    <img src={card.img} alt="" className="w-full h-full object-cover" />
+                    <img src={card.img} alt={card.alt} className="w-full h-full object-cover" />
                   </div>
                   <span className="text-xs font-semibold text-ink">{card.label}</span>
                 </div>

@@ -1,0 +1,33 @@
+{
+  "name": "BatchBG",
+  "version": "1.0.0",
+  "description": "AI-powered background removal and image processing",
+  "supportedInterfaces": [
+    {
+      "type": "mcp",
+      "url": "https://batchbg.com/.well-known/mcp/server-card.json"
+    }
+  ],
+  "capabilities": [
+    "background-removal",
+    "batch-processing",
+    "image-compression"
+  ],
+  "skills": [
+    {
+      "id": "bg-removal",
+      "name": "Background Removal",
+      "description": "Remove backgrounds from images using AI"
+    },
+    {
+      "id": "batch-process",
+      "name": "Batch Processing",
+      "description": "Process multiple images at once"
+    },
+    {
+      "id": "compress",
+      "name": "Image Compression",
+      "description": "Compress images to reduce file size"
+    }
+  ]
+}

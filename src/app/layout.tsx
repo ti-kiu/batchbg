@@ -2,15 +2,17 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Free Bulk Background Remover — No Signup | BatchBG",
-  description: "Remove backgrounds from unlimited product photos at once. 100% local processing in your browser — images never leave your device. Free, fast, no signup required.",
-  keywords: "bulk background remover, batch background remover, remove backgrounds in bulk, free background remover",
+  metadataBase: new URL("https://batchbg.com"),
+  title: "Free Bulk Background Remover — Batch Photo Editor | BatchBG",
+  description: "Remove backgrounds from unlimited product photos at once. 100% local browser processing, images never leave your device. Free, no signup, no upload limit.",
+  keywords: "bulk background remover, batch background remover, free background remover, product photo editor",
   openGraph: {
     title: "Free Bulk Background Remover — No Signup",
     description: "Remove backgrounds from unlimited product photos at once. 100% local, no upload, no signup.",
     url: "https://batchbg.com",
     siteName: "BatchBG",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "BatchBG — Free Bulk Background Remover" }],
   },
   alternates: { canonical: "https://batchbg.com" },
 };
@@ -22,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="google-site-verification" content="BcgXSHOsrKZGKJ2CkS9DXxujm4VFaJoG-aNDPigoJtI" />
         <meta name="msvalidate.01" content="8D5AE51845CFE08F58F54A68CFF76D57" />
+        <meta name="mitgo-verification" content="de01d27f-55eb-41ba-8f69-0ccea92048d5" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]function(){(c[a].q=c[a].q[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "ykzf7m51xt");`,
@@ -42,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <script src="/assets/compliance.js"></script>
+        <script src="/webmcp.js"></script>
         <script defer data-domain="batchbg.com" src="https://plausible.io/js/script.js"></script>
         <script
           type="application/ld+json"
@@ -59,41 +63,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 name: "BatchBG",
                 url: "https://batchbg.com",
               },
-              datePublished: "2025-03-01",
-              dateModified: "2026-09-15",
+              datePublished: "2026-09-18",
+              dateModified: "2026-11-13",
               offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.8",
-                bestRating: "5",
-                worstRating: "1",
-                ratingCount: "1247",
-              },
               featureList: ["Bulk background removal", "100% local processing", "No signup required", "Unlimited free usage"],
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              author: {
-                "@type": "Organization",
-                name: "BatchBG",
-                url: "https://batchbg.com",
-              },
-              datePublished: "2025-03-01",
-              dateModified: "2026-09-15",
-              mainEntity: [
-                { "@type": "Question", name: "How many images can I process at once?", acceptedAnswer: { "@type": "Answer", text: "There is no limit. Process 10, 100, or 1,000 images in a single session. The only constraint is your device's available memory." } },
-                { "@type": "Question", name: "Are my images uploaded to a server?", acceptedAnswer: { "@type": "Answer", text: "No. All processing happens locally in your browser using ONNX Runtime Web (WebAssembly). Your images never leave your device." } },
-                { "@type": "Question", name: "Is it really free? No watermarks?", acceptedAnswer: { "@type": "Answer", text: "Yes, completely free with no watermarks, no sign-up, and no per-image charges. Batch processing will always be free." } },
-                { "@type": "Question", name: "What image formats are supported?", acceptedAnswer: { "@type": "Answer", text: "Input: JPG, JPEG, PNG, and WebP. Output is always PNG with transparent or solid-color backgrounds." } },
-                { "@type": "Question", name: "How does this compare to remove.bg?", acceptedAnswer: { "@type": "Answer", text: "BatchBG is free and unlimited, while remove.bg charges per image and is shutting down December 1, 2026. We process everything locally via WebAssembly." } },
-                { "@type": "Question", name: "Can I use the results commercially?", acceptedAnswer: { "@type": "Answer", text: "Yes. All processed images are yours to use for Amazon, Etsy, Shopify, print-on-demand, or any commercial purpose with no restrictions." } },
-              ],
             }),
           }}
         />
@@ -106,7 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="font-bold text-xl text-ink">Batch<span className="text-green">BG</span></span>
             </a>
             <div className="hidden sm:flex items-center gap-6 text-sm text-sub">
-              <a href="/batch-background-remover/" className="hover:text-ink transition-colors">Batch Remover</a>
+              <a href="/bulk-background-remover/" className="hover:text-ink transition-colors">Batch Remover</a>
               <a href="/remove-background-from-product-photos/" className="hover:text-ink transition-colors">Product Photos</a>
               <a href="/amazon-white-background/" className="hover:text-ink transition-colors">Amazon White BG</a>
               <a href="/remove-bg-alternative/" className="hover:text-ink transition-colors">remove.bg Alternative</a>
@@ -121,10 +94,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div>
                 <h3 className="font-semibold text-ink mb-3">Tools</h3>
                 <ul className="space-y-2 text-sm text-sub">
-                  <li><a href="/" className="hover:text-ink">Bulk Background Remover</a></li>
-                  <li><a href="/batch-background-remover/" className="hover:text-ink">Batch Background Remover</a></li>
+                  <li><a href="/bulk-background-remover/" className="hover:text-ink">Bulk Background Remover</a></li>
+                  <li><a href="/bulk-background-remover/" className="hover:text-ink">Batch Background Remover</a></li>
                   <li><a href="/remove-background-from-product-photos/" className="hover:text-ink">Product Photo BG</a></li>
                   <li><a href="/batch-image-compressor/" className="hover:text-ink">Batch Image Compressor</a></li>
+                  <li><a href="/bulk-image-resizer/" className="hover:text-ink">Bulk Image Resizer</a></li>
                 </ul>
               </div>
               <div>
@@ -137,6 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <h3 className="font-semibold text-ink mb-3">Alternatives</h3>
                 <ul className="space-y-2 text-sm text-sub">
                   <li><a href="/remove-bg-alternative/" className="hover:text-ink">remove.bg Alternative</a></li>
+                  <li><a href="/transparent-background/" className="hover:text-ink">Bulk Transparent Background</a></li>
                 </ul>
               </div>
               <div>
@@ -152,6 +127,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <ul className="space-y-2 text-sm text-sub">
                   <li><a href="/blog/best-bulk-background-remover-2026/" className="hover:text-ink">Best Bulk BG Remover 2026</a></li>
                   <li><a href="/blog/remove-bg-shutting-down-migration/" className="hover:text-ink">remove.bg Migration Guide</a></li>
+                  <li><a href="/blog/etsy-photo-requirements/" className="hover:text-ink">Etsy Photo Requirements</a></li>
                 </ul>
               </div>
             </div>

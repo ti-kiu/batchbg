@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import BackgroundRemoverTool from "@/components/BackgroundRemoverTool";
 import CompareSlider from "@/components/CompareSlider";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
   title: "remove.bg Alternative — Free, Unlimited, No Shutdown | BatchBG",
   description:
     "remove.bg is shutting down December 1, 2026. BatchBG is the free alternative: unlimited background removal, 100% local, no per-image charges, no credits.",
   keywords:
-    "remove.bg alternative, remove bg alternative, free alternative to remove.bg, remove.bg shutting down",
+    "remove.bg alternative, remove bg alternative, free alternative to remove.bg, remove.bg shutting down, remove bg bulk free, remove background bulk free",
   alternates: { canonical: "https://batchbg.com/remove-bg-alternative/" },
   openGraph: {
     title: "remove.bg Alternative — Free, Unlimited, No Shutdown",
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
 export default function RemoveBgAlternative() {
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'remove.bg Alternative', url: 'https://batchbg.com/remove-bg-alternative/' }]} />
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
         <div className="text-center mb-6">
           <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-ink mb-3">
@@ -43,8 +45,21 @@ export default function RemoveBgAlternative() {
         <article className="prose prose-gray max-w-none">
           <h2 className="font-heading text-2xl font-bold text-ink mb-4">remove.bg Is Shutting Down — What You Need to Know</h2>
           <p className="text-sub leading-relaxed mb-4">
-            On December 1, 2026 at 9:00 CET, remove.bg will shut down its standalone website. The service — which processed an estimated 10 million images per month and served over 240 million monthly search visits — is being absorbed into Canva&apos;s ecosystem. Any unused Pay-As-You-Go credits will expire on that date. API endpoints are being redirected to Leonardo.ai, which uses a different request format and credit-based pricing model.
+            On December 1, 2026 at 9:00 CET, remove.bg will shut down its standalone website. The service — which by widely cited industry estimates processed around 10 million images per month — is being absorbed into Canva&apos;s ecosystem. Any unused Pay-As-You-Go credits will expire on that date. API endpoints are being redirected to Leonardo.ai, which uses a different request format and credit-based pricing model.
           </p>
+          <p className="text-sub leading-relaxed mb-4">
+            remove.bg&apos;s own FAQ states it directly: &ldquo;The standalone website will no longer be available from 1 December 2026 at 9:00am CET.&rdquo; Feature work moves into Canva (Pro plan only), and the public API is handed to Leonardo.ai — meaning the pricing model and request format you integrated against will not survive the migration either way.
+          </p>
+
+          <div className="bg-accent/5 border border-accent/30 rounded-xl p-5 mb-6 not-prose">
+            <p className="text-xs font-semibold text-accent uppercase tracking-wide mb-2">Updated November 2026 — 2 weeks to shutdown</p>
+            <ul className="text-sm text-sub space-y-2">
+              <li><span className="font-semibold text-ink">Nov 13:</span> remove.bg still processes images normally. Credits still work. If you have a backlog, this is the week to burn it down — queues and support response degrade in the final days before a shutdown.</li>
+              <li><span className="font-semibold text-ink">Deadline math:</span> credits expire with no refund on Dec 1. A 1,000-image backlog at Pay-As-You-Go rates is roughly $70–200 of credit value that vanishes at 9:00 CET.</li>
+              <li><span className="font-semibold text-ink">API users:</span> Leonardo.ai endpoints do not accept remove.bg&apos;s request format. Budget a code change now, not on Dec 2 — or test the local route below, which needs no API at all.</li>
+              <li><span className="font-semibold text-ink">After Dec 1:</span> this page stays as the reference for what shut down, what replaced it, and what the free local option covers.</li>
+            </ul>
+          </div>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">What Happens to Your remove.bg Account?</h3>
           <ul className="text-sub text-sm space-y-2 mb-4">
@@ -128,7 +143,7 @@ export default function RemoveBgAlternative() {
                   ["Upload required", "Yes (server-side)", "No (100% local)"],
                   ["Privacy", "Images sent to servers", "Never leaves your device"],
                   ["Signup required", "Yes", "No"],
-                  ["API access", "Paid (shutting down)", "Planned (free)"],
+                  ["API access", "Paid (shutting down)", "Not yet (in planning)"],
                   ["Watermark", "On free tier", "Never"],
                   ["Resolution limit", "Full on paid plans", "Full resolution, always free"],
                   ["Processing speed", "1–3 sec (server)", "2–15 sec (device-dependent)"],
@@ -171,10 +186,10 @@ export default function RemoveBgAlternative() {
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3">How to Migrate from remove.bg</h3>
           <p className="text-sub leading-relaxed mb-4">
-            If you were using remove.bg for product photo processing, switching to BatchBG takes 30 seconds: open batchbg.com, drop your images, click remove. No account, no API key, no credit card — ideal for <a href="/batch-background-remover/" className="text-accent hover:underline">batch processing</a> at any scale. The workflow is identical but with no per-image cost and no upload — your images stay on your device. Perfect for creating <a href="/amazon-white-background/" className="text-accent hover:underline">Amazon-compliant photos</a>.
+            If you were using remove.bg for product photo processing, switching to BatchBG takes 30 seconds: open batchbg.com, drop your images, click remove. No account, no API key, no credit card — ideal for <a href="/bulk-background-remover/" className="text-accent hover:underline">batch processing</a> at any scale. The workflow is identical but with no per-image cost and no upload — your images stay on your device. Perfect for creating <a href="/amazon-white-background/" className="text-accent hover:underline">Amazon-compliant photos</a>.
           </p>
           <p className="text-sub leading-relaxed mb-4">
-            For API users, we are building a drop-in compatible API endpoint that accepts the same request format as remove.bg&apos;s v1.0 API. <a href="/blog/remove-bg-shutting-down-migration/" className="text-accent hover:underline">Read our full migration guide</a> for developers, including code samples and timeline.
+            For API users, we are building a drop-in compatible API endpoint that accepts the same request format as remove.bg&apos;s v1.0 API. <a href="/blog/remove-bg-shutting-down-migration/" className="text-accent hover:underline">Read our full migration guide</a> for developers — status, caveats, and the options that work today.
           </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">Why Local Processing Is the Future</h3>
@@ -189,9 +204,10 @@ export default function RemoveBgAlternative() {
             {[
               { q: "Is BatchBG really a replacement for remove.bg?", a: "Yes. BatchBG offers the same core feature — AI background removal — but runs locally in your browser instead of on remote servers. It is free, unlimited, and has no shutdown risk because there is no server to turn off." },
               { q: "Why is remove.bg shutting down?", a: "Canva acquired remove.bg in 2021 and is consolidating all background removal into the Canva platform. The standalone website, apps, and API are being discontinued. Background removal continues inside Canva Pro ($14.99/month) without batch or API support." },
-              { q: "Can I migrate my remove.bg API integration?", a: "We are building a drop-in API endpoint compatible with remove.bg's v1.0 request format. If your code sends POST requests to api.remove.bg/v1.0/removebg, you will only need to change the base URL. Check our migration guide for updates and timeline." },
+              { q: "Can I migrate my remove.bg API integration?", a: "A drop-in API compatible with remove.bg\'s v1.0 format is in planning, but it is not live and has no committed release date - do not build your December migration around it. Plan on Leonardo.ai code changes or the local in-browser route, both of which work today." },
               { q: "Is the quality comparable to remove.bg?", a: "BatchBG uses u2netp for instant processing (comparable to remove.bg standard) and BiRefNet for HD mode (comparable to remove.bg HD). Both run locally. In our tests, BiRefNet produces equivalent or better edge quality on product photography." },
               { q: "Will BatchBG ever charge per image?", a: "No. Batch processing is free and unlimited by design — it runs on your device, so there is no server cost to pass on. Optional Pro features (API access, team presets, custom models) may be added later as paid upgrades, but core batch processing stays free." },
+              { q: "Can I remove backgrounds from many images at once for free?", a: "Yes — that is exactly what BatchBG does. Drop an entire folder of images, and every background is removed in one pass with no per-image charge, no credits, and no watermark. Unlike remove.bg's credit-based pricing, where each image consumes paid credits, batch processing here is unlimited because the AI runs locally on your own device." },
               { q: "What if I already paid for remove.bg credits?", a: "Use them before December 1, 2026 — they expire on shutdown day and are non-refundable. Process any backlog images on remove.bg now, then switch to BatchBG for ongoing work." },
             ].map((faq, i) => (
               <details key={i} className="bg-card rounded-xl border border-line p-5 group">
@@ -211,9 +227,10 @@ export default function RemoveBgAlternative() {
             mainEntity: [
               { "@type": "Question", name: "Is BatchBG really a replacement for remove.bg?", acceptedAnswer: { "@type": "Answer", text: "Yes. BatchBG offers the same core feature — AI background removal — but runs locally in your browser instead of on remote servers. It is free, unlimited, and has no shutdown risk." } },
               { "@type": "Question", name: "Why is remove.bg shutting down?", acceptedAnswer: { "@type": "Answer", text: "Canva acquired remove.bg in 2021 and is consolidating all background removal into the Canva platform. The standalone website, apps, and API are being discontinued on December 1, 2026." } },
-              { "@type": "Question", name: "Can I migrate my remove.bg API integration?", acceptedAnswer: { "@type": "Answer", text: "We are building a drop-in API endpoint compatible with remove.bg's v1.0 request format. You will only need to change the base URL." } },
+              { "@type": "Question", name: "Can I migrate my remove.bg API integration?", acceptedAnswer: { "@type": "Answer", text: "A drop-in API compatible with remove.bg\'s v1.0 format is in planning but not live yet, with no committed release date." } },
               { "@type": "Question", name: "Is the quality comparable to remove.bg?", acceptedAnswer: { "@type": "Answer", text: "BatchBG uses u2netp for instant processing (comparable to remove.bg standard) and BiRefNet for HD mode (comparable to remove.bg HD). Both run locally." } },
               { "@type": "Question", name: "Will BatchBG ever charge per image?", acceptedAnswer: { "@type": "Answer", text: "No. Batch processing is free and unlimited by design — it runs on your device, so there is no server cost to pass on." } },
+              { "@type": "Question", name: "Can I remove backgrounds from many images at once for free?", acceptedAnswer: { "@type": "Answer", text: "Yes. Drop an entire folder and every background is removed in one pass with no per-image charge, no credits, and no watermark. Because processing runs locally, batch volume costs nothing extra — unlike credit-based tools where each image consumes paid credits." } },
               { "@type": "Question", name: "What if I already paid for remove.bg credits?", acceptedAnswer: { "@type": "Answer", text: "Use them before December 1, 2026 — they expire on shutdown day and are non-refundable. Process any backlog on remove.bg now, then switch to BatchBG." } },
             ],
           }),

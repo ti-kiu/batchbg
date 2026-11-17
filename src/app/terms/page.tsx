@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
   title: "Terms of Service | BatchBG",
@@ -8,7 +9,9 @@ export const metadata: Metadata = {
 
 export default function Terms() {
   return (
-    <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <>
+      <BreadcrumbSchema items={[{ name: 'Terms of Service', url: 'https://batchbg.com/terms/' }]} />
+      <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="font-heading font-bold text-3xl text-ink mb-6">Terms of Service</h1>
       <p className="text-sub text-sm mb-8">Last updated: September 19, 2026</p>
       <div className="prose prose-gray max-w-none text-sub leading-relaxed space-y-6">
@@ -66,5 +69,6 @@ export default function Terms() {
         </div>
       </div>
     </article>
+    </>
   );
 }

@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
-Disallow: /404/
+Disallow: /api/
+Disallow: /auth/
 
 Sitemap: https://batchbg.com/sitemap.xml
+
+Content-Signal: ai-train=no, search=yes, ai-input=yes

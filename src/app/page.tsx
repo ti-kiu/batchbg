@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import BackgroundRemoverTool from "@/components/BackgroundRemoverTool";
 import CompareSlider from "@/components/CompareSlider";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
   title: "Free Bulk Background Remover — No Signup | BatchBG",
   description:
-    "Remove backgrounds from unlimited product photos at once. 100% local browser processing — images never leave your device. Free, no signup.",
+    "Free bulk background remover for hundreds of product photos at once. Remove backgrounds in bulk — 100% in your browser, no signup, no uploads.",
   keywords:
-    "bulk background remover, batch background remover, remove backgrounds in bulk, free background remover",
+    "bulk background remover, batch background remover, free background remover",
   alternates: { canonical: "https://batchbg.com" },
 };
 
@@ -77,6 +78,7 @@ function StepIcon({ type }: { type: string }) {
 export default function Home() {
   return (
     <>
+      <BreadcrumbSchema items={[]} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -110,8 +112,8 @@ export default function Home() {
             >
               free
             </span>
-            unlimited, no signup. Remove backgrounds from hundreds of images
-            — 100% on your device.
+            unlimited, no signup. A free bulk background remover that handles
+            hundreds of images in one queue — 100% in your browser.
           </p>
           <p className="text-xs text-sub mt-2">Last updated: September 2026 · By BatchBG Team</p>
 
@@ -147,10 +149,11 @@ export default function Home() {
                 One queue, one folder, one ZIP
               </h2>
               <p className="text-[#54616C] leading-relaxed">
-                Drop an entire folder of product photos and let the queue run.
-                No per-image credits, no upload limits, no waiting for
-                individual downloads. BatchBG processes every file in parallel
-                on your device and packages the results into a single ZIP —
+                BatchBG is a bulk background remover built for whole catalogs,
+                not single files. Drop an entire folder of product photos and
+                let the queue run. No per-image credits, no upload limits, no
+                waiting for individual downloads. Every file is processed in
+                parallel on your device and packaged into a single ZIP —
                 filenames preserved, ready to re-upload.
               </p>
             </div>
@@ -161,7 +164,9 @@ export default function Home() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/demo/product-after.jpg?v=2"
-                alt="Product cutout on transparent background"
+                alt="Product cutout on transparent background made with the bulk background remover"
+                width={900}
+                height={550}
                 className="w-full rounded-lg"
               />
             </div>
@@ -221,7 +226,10 @@ export default function Home() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/demo/camera-after.jpg"
-                alt="Camera cutout with clean edges on white background"
+                alt="Camera product photo after bulk background removal, clean edges on white"
+                width={900}
+                height={596}
+                loading="lazy"
                 className="w-full rounded-lg"
               />
             </div>
@@ -373,8 +381,8 @@ export default function Home() {
             BatchBG vs Alternatives
           </h2>
           <p className="text-body text-center mb-8">
-            How does a free, local bulk background remover compare to paid
-            cloud tools?
+            How does a free bulk background remover that runs locally compare to
+            paid cloud tools?
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
@@ -625,6 +633,12 @@ export default function Home() {
                 <div className="text-body text-xs">Uploads</div>
               </div>
             </div>
+            <a
+              href="/bulk-background-remover/"
+              className="inline-block mt-3 text-green text-xs font-semibold hover:underline"
+            >
+              Bulk Background Remover →
+            </a>
           </div>
         </div>
       </section>
@@ -690,6 +704,11 @@ export default function Home() {
             <h3 className="font-heading font-semibold text-lg text-ink mb-2">remove.bg Shutting Down: Your Complete Migration Guide</h3>
             <p className="text-sm text-sub">remove.bg is closing December 1, 2026. How to migrate your workflow to free alternatives with zero downtime.</p>
           </a>
+          <a href="/blog/amazon-image-rejected/" className="block bg-white rounded-xl p-6 border border-line hover:shadow-lg transition-shadow">
+            <p className="text-sm text-sub mb-2">October 9, 2026 · 7 min read</p>
+            <h3 className="font-heading font-semibold text-lg text-ink mb-2">Why Amazon Rejects Your White Background Images</h3>
+            <p className="text-sm text-sub">It&apos;s rarely the color — it&apos;s one of six other triggers. The exact RGB thresholds and a batch fix for your whole catalog.</p>
+          </a>
         </div>
       </section>
 
@@ -699,7 +718,7 @@ export default function Home() {
           Frequently Asked Questions
         </h2>
         <p className="text-body text-center mb-8">
-          Everything you need to know about bulk background removal with
+          Everything you need to know about removing backgrounds in bulk with
           BatchBG.
         </p>
         <div className="space-y-3">

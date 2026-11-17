@@ -1,0 +1,19 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://batchbg.com/",
+      "service-desc": [
+        {
+          "href": "https://batchbg.com/openapi.json",
+          "type": "application/json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://batchbg.com/llms.txt",
+          "type": "text/plain"
+        }
+      ]
+    }
+  ]
+}

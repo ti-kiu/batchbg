@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import BackgroundRemoverTool from "@/components/BackgroundRemoverTool";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
-  title: "Remove Background from Product Photos — Free, No Upload | BatchBG",
+  title: "Remove Background from Product Photos — Free & Unlimited | BatchBG",
   description:
-    "Remove backgrounds from product photos for Amazon, Etsy, and Shopify. White background compliant, 100% local, free and unlimited.",
+    "Bulk-remove backgrounds from product photos for Amazon, Etsy, Shopify. White-background compliant, ZIP download, no signup, no per-image fee. 100% local — images never leave your device.",
   keywords:
     "remove background from product photos, product photo background remover, ecommerce background removal, white background product photo",
   alternates: { canonical: "https://batchbg.com/remove-background-from-product-photos/" },
   openGraph: {
-    title: "Remove Background from Product Photos — Free, No Upload",
-    description: "Remove backgrounds from product photos for Amazon, Etsy, Shopify. White background compliant.",
+    title: "Remove Background from Product Photos — Free & Unlimited",
+    description: "Bulk background removal for Amazon, Etsy, Shopify photos. White-background compliant, ZIP download, no signup.",
     url: "https://batchbg.com/remove-background-from-product-photos/",
   },
 };
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 export default function ProductPhotos() {
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'Product Photo Background', url: 'https://batchbg.com/remove-background-from-product-photos/' }]} />
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
         <div className="text-center mb-6">
           <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-ink mb-3">
@@ -88,12 +90,12 @@ export default function ProductPhotos() {
             </div>
           </div>
           <p className="text-sub leading-relaxed mb-4">
-            Amazon rejects images that fail these checks — and suppressed listings lose search ranking within 24 hours. BatchBG&apos;s White mode outputs exactly RGB 255,255,255, matching Amazon&apos;s automated validation. See our <a href="/amazon-white-background/" className="text-accent hover:underline">Amazon white background</a> guide for full requirements.
+            Amazon rejects images that fail these checks — and suppressed listings lose search ranking within 24 hours. BatchBG&apos;s White mode outputs exactly RGB 255,255,255, matching Amazon&apos;s automated validation. See our <a href="/amazon-white-background/" className="text-accent hover:underline">Amazon white background</a> guide for full requirements, or jump to the <a href="/product-photo-background-remover/" className="text-accent hover:underline">marketplace spec table</a> for Walmart, eBay, Etsy and Shopify values side by side.
           </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">Etsy &amp; Shopify Photo Tips</h3>
           <p className="text-sub leading-relaxed mb-4">
-            Etsy sellers benefit from lifestyle context — use BatchBG to remove the original background, then composite onto a styled scene using Canva or Figma. Etsy&apos;s algorithm favors images with warm, natural lighting and contextual props. Shopify product pages look best with consistent white or light-gray backgrounds across your entire catalog. Using <a href="/batch-background-remover/" className="text-accent hover:underline">batch processing</a> ensures every image in your store has the same visual treatment, which builds brand trust. A 2025 Shopify Merchants Report found that stores with consistent product imagery see 18% higher conversion rates than those with mixed visual styles.
+            Etsy sellers benefit from lifestyle context — use BatchBG to remove the original background, then composite onto a styled scene using Canva or Figma. Etsy&apos;s algorithm favors images with warm, natural lighting and contextual props. Shopify product pages look best with consistent white or light-gray backgrounds across your entire catalog. Using <a href="/bulk-background-remover/" className="text-accent hover:underline">batch processing</a> ensures every image in your store has the same visual treatment, which builds brand trust. A 2025 Shopify Merchants Report found that stores with consistent product imagery see 18% higher conversion rates than those with mixed visual styles.
           </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">BatchBG vs Manual Editing: Time Comparison</h3>
@@ -147,9 +149,9 @@ export default function ProductPhotos() {
 
           <div className="grid sm:grid-cols-3 gap-4 mb-6 not-prose">
             {[
-              { src: "/demo/product-after.jpg", label: "product-after.jpg" },
-              { src: "/demo/portrait-after.jpg", label: "portrait-after.jpg" },
-              { src: "/demo/camera-after.jpg", label: "camera-after.jpg" },
+              { src: "/demo/product-after.jpg", label: "product-after.jpg", alt: "Product photo with background removed" },
+              { src: "/demo/portrait-after.jpg", label: "portrait-after.jpg", alt: "Portrait photo with background removed" },
+              { src: "/demo/camera-after.jpg", label: "camera-after.jpg", alt: "Camera product photo with background removed" },
             ].map((img, i) => (
               <div key={i} className="rounded-2xl shadow-card overflow-hidden bg-card">
                 <div
@@ -160,7 +162,7 @@ export default function ProductPhotos() {
                   }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.src} alt={img.label} className="w-full rounded-lg" />
+                  <img src={img.src} alt={img.alt} className="w-full rounded-lg" />
                 </div>
                 <p className="text-center text-xs text-sub py-2 font-mono">{img.label}</p>
               </div>

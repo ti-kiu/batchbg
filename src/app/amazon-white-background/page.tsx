@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import BackgroundRemoverTool from "@/components/BackgroundRemoverTool";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
-  title: "Amazon White Background — Product Photo Requirements & Free Tool | BatchBG",
+  title: "Amazon White Background Maker — Batch & Free | BatchBG",
   description:
-    "Make Amazon-compliant product photos: pure white RGB 255 background, 85% fill, 2000×2000 px. Free tool, no upload, instant batch processing.",
+    "Turn any product photo into an Amazon-compliant white background (pure RGB 255, 85% fill, 2000×2000 px). Do the whole catalog in one batch — free, no signup, passes Amazon's image checker.",
   keywords:
     "amazon white background, amazon product photo requirements, amazon white background image, amazon main image guidelines",
   alternates: { canonical: "https://batchbg.com/amazon-white-background/" },
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 export default function AmazonWhiteBackground() {
   return (
     <>
+      <BreadcrumbSchema items={[{ name: 'Amazon White Background', url: 'https://batchbg.com/amazon-white-background/' }]} />
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
         <div className="text-center mb-6">
           <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-ink mb-3">
@@ -100,7 +102,7 @@ export default function AmazonWhiteBackground() {
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">How BatchBG Helps You Comply</h3>
           <p className="text-sub leading-relaxed mb-4">
-            Select &quot;White&quot; background mode in BatchBG. The tool removes the original background and replaces it with pure RGB 255,255,255 white — the exact value Amazon&apos;s automated checker validates. You can <a href="/batch-background-remover/" className="text-accent hover:underline">batch remove backgrounds</a> across your entire catalog. No manual color picking, no Photoshop curves, no chance of being off by a few shades. A 2025 analysis by Helium 10 found that 23% of new seller listing rejections were due to non-compliant main images — the single most common preventable rejection.
+            Select &quot;White&quot; background mode in BatchBG. The tool removes the original background and replaces it with pure RGB 255,255,255 white — the exact value Amazon&apos;s automated checker validates. You can <a href="/bulk-background-remover/" className="text-accent hover:underline">batch remove backgrounds</a> across your entire catalog. No manual color picking, no Photoshop curves, no chance of being off by a few shades. A 2025 analysis by Helium 10 found that 23% of new seller listing rejections were due to non-compliant main images — the single most common preventable rejection.
           </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3 mt-8">Step-by-Step: Make Amazon-Ready Photos</h3>
@@ -160,6 +162,10 @@ export default function AmazonWhiteBackground() {
               </div>
             ))}
           </div>
+
+          <p className="text-sub text-sm leading-relaxed mb-6 not-prose">
+            Not sure which rule your file tripped? See the full checklist of <a href="/blog/amazon-image-rejected/" className="text-accent hover:underline">why Amazon rejects white background images</a> — all 7 triggers, in the order to check them.
+          </p>
 
           <h3 className="font-heading text-xl font-semibold text-ink mb-3">Amazon Image Requirements by Category</h3>
           <div className="bg-card rounded-xl border border-line overflow-hidden mb-6 not-prose">

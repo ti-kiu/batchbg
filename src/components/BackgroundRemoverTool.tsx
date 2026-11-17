@@ -131,6 +131,23 @@ async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
   const hard = new Uint8Array(N);
   for (let i = 0; i < N; i++) hard[i] = a32[i] >= TH ? 1 : 0;
 
+  // Step 0b: Force-clear border pixels — model may produce false-foreground
+  // confidence at image edges, which blocks the flood fill and leaves
+  // semi-transparent borders visible after background replacement.
+  const BORDER = 4;
+  for (let x = 0; x < SIZE; x++) {
+    for (let b = 0; b < BORDER; b++) {
+      hard[b * SIZE + x] = 0;              // top rows
+      hard[(SIZE - 1 - b) * SIZE + x] = 0; // bottom rows
+    }
+  }
+  for (let y = 0; y < SIZE; y++) {
+    for (let b = 0; b < BORDER; b++) {
+      hard[y * SIZE + b] = 0;              // left cols
+      hard[y * SIZE + (SIZE - 1 - b)] = 0; // right cols
+    }
+  }
+
   // Step 1: Flood fill from edges — low-confidence connected to edge = background
   const bg = new Uint8Array(N);
   const st: number[] = [];
@@ -206,6 +223,22 @@ async function removeBackground(imageBitmap: ImageBitmap): Promise<ImageData> {
     rdata.data[i * 4 + 3] = sdata.data[i * 4 + 3];
   }
 
+  // Step 6: Force-clear full-res edge alpha — upscaling from 320×320 interpolates
+  // edge values upward, leaving thin white/semi-transparent strips after compositing.
+  const EDGE = 3;
+  for (let x = 0; x < W; x++) {
+    for (let e = 0; e < EDGE; e++) {
+      rdata.data[(e * W + x) * 4 + 3] = 0;
+      rdata.data[((H - 1 - e) * W + x) * 4 + 3] = 0;
+    }
+  }
+  for (let y = 0; y < H; y++) {
+    for (let e = 0; e < EDGE; e++) {
+      rdata.data[(y * W + e) * 4 + 3] = 0;
+      rdata.data[(y * W + (W - 1 - e)) * 4 + 3] = 0;
+    }
+  }
+
   return rdata;
 }
 
@@ -215,10 +248,46 @@ async function applyBackground(imageData: ImageData, mode: BgMode, customColor?:
   if (mode === "transparent") {
     ctx.putImageData(imageData, 0, 0);
   } else {
-    ctx.fillStyle = mode === "custom" && customColor ? customColor : "#FFFFFF";
+    const bgColor = mode === "custom" && customColor ? customColor : "#FFFFFF";
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, imageData.width, imageData.height);
-    const tmp = new OffscreenCanvas(imageData.width, imageData.height);
-    tmp.getContext("2d")!.putImageData(imageData, 0, 0);
+
+    // Pre-composite: replace pixels that match the original background color with
+    // full transparency, so the fill color shows through cleanly. This handles
+    // product photos where the model incorrectly marks white/light backgrounds as
+    // foreground (high alpha), causing white strips at edges after compositing.
+    // Clone imageData so we don't mutate the shared mask in maskStore.
+    const imgCopy = new ImageData(
+      new Uint8ClampedArray(imageData.data), imageData.width, imageData.height
+    );
+    const d = imgCopy.data;
+    const W = imageData.width, H = imageData.height;
+    const INSET = 4;
+    // Sample corner colors (4 corners, 4×4 px each)
+    const corners: [number, number][] = [[INSET, INSET], [W - 1 - INSET, INSET], [INSET, H - 1 - INSET], [W - 1 - INSET, H - 1 - INSET]];
+    let cR = 0, cG = 0, cB = 0;
+    for (const [cx, cy] of corners) {
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const idx = ((cy + dy) * W + (cx + dx)) * 4;
+        cR += d[idx]; cG += d[idx + 1]; cB += d[idx + 2];
+      }
+    }
+    cR = Math.round(cR / 36); cG = Math.round(cG / 36); cB = Math.round(cB / 36);
+
+    // If corners are light (typical product photo bg: white, light gray, etc.)
+    const cornerBrightness = (cR + cG + cB) / 3;
+    if (cornerBrightness > 200) {
+      const BG_DIST = 55;
+      for (let i = 0; i < W * H; i++) {
+        const dr = d[i * 4] - cR, dg = d[i * 4 + 1] - cG, db = d[i * 4 + 2] - cB;
+        if (Math.sqrt(dr * dr + dg * dg + db * db) < BG_DIST) {
+          d[i * 4 + 3] = 0; // Make transparent → green/white fill shows through
+        }
+      }
+    }
+
+    const tmp = new OffscreenCanvas(W, H);
+    tmp.getContext("2d")!.putImageData(imgCopy, 0, 0);
     ctx.drawImage(tmp, 0, 0);
   }
   return canvas.convertToBlob({ type: "image/png" });
@@ -732,7 +801,7 @@ export default function BackgroundRemoverTool({ config }: { config?: ToolConfig 
             const hasVariants = Object.keys(img.resultUrls).length > 1;
             return (
               <div key={img.id} className={`rounded-lg border-2 overflow-hidden bg-white transition-all ${img.status === "done" ? "border-green" : img.status === "processing" ? "border-blue" : img.status === "error" ? "border-red bg-red-bg" : "border-line"}`}>
-                <div className="aspect-square relative checkerboard">
+                <div className={`aspect-square relative ${img.status === "done" && img.previewMode === "transparent" ? "checkerboard" : "bg-white"}`}>
                   <img src={displayUrl} alt={img.file.name} className="w-full h-full object-contain" />
                   {img.status === "processing" && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" /></div>}
                   {img.status === "queued" && <div className="absolute inset-0 bg-black/10 flex items-center justify-center text-sub text-xs font-medium">Queued</div>}

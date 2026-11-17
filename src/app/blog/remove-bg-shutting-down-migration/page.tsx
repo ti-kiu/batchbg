@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
   title: "remove.bg Shutting Down: Migration Guide & Alternatives (Dec 2026) | BatchBG",
@@ -7,11 +8,21 @@ export const metadata: Metadata = {
   keywords:
     "remove.bg shutting down, remove bg migration, remove.bg alternative 2026, remove.bg API migration",
   alternates: { canonical: "https://batchbg.com/blog/remove-bg-shutting-down-migration/" },
+  openGraph: {
+    title: "remove.bg Shutting Down: Migration Guide & Alternatives (Dec 2026)",
+    description:
+      "remove.bg shuts down December 1, 2026. Complete migration checklist: save your credits, export your history, switch to a free alternative.",
+    url: "https://batchbg.com/blog/remove-bg-shutting-down-migration/",
+    siteName: "BatchBG",
+    type: "article",
+  },
 };
 
 export default function RemoveBgMigration() {
   return (
-    <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <>
+      <BreadcrumbSchema items={[{ name: 'Blog', url: 'https://batchbg.com/blog/remove-bg-shutting-down-migration/' }, { name: 'remove.bg Migration', url: 'https://batchbg.com/blog/remove-bg-shutting-down-migration/' }]} />
+      <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -26,6 +37,65 @@ export default function RemoveBgMigration() {
             dateModified: "2026-09-19",
             url: "https://batchbg.com/blog/remove-bg-shutting-down-migration/",
             mainEntityOfPage: "https://batchbg.com/blog/remove-bg-shutting-down-migration/",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "When exactly does remove.bg shut down?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "December 1, 2026 at 9:00 CET. After that, the website, API, desktop apps, mobile apps, and Photoshop plugin all stop functioning. Any unused credits expire with no refund.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Will my remove.bg account data be deleted?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes. All processed images stored on remove.bg's servers will be deleted after shutdown. Export your processing history before December 1 using Dashboard → History → Download All.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Can I get a refund for unused credits?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "No. remove.bg's terms state that unused credits expire on the shutdown date with no refund. Process your backlog before December 1 to maximize the value of credits you've already paid for.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Is Canva's built-in background remover a good replacement?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "It works for single images if you already pay for Canva Pro ($14.99/month). However, it has no batch processing, no API access, and requires uploading images to Canva's servers. For bulk workflows, BatchBG is a better fit.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Will the remove.bg API keep working after shutdown?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "No. All API endpoints (api.remove.bg/v1.0/removebg) will return HTTP 410 Gone after December 1, 2026. Canva is directing API users to Leonardo.ai, which uses a different request format and pricing model.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What is the fastest way to migrate 1,000+ images?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Use your remaining remove.bg credits to process queued images now. For ongoing work, switch to BatchBG — it handles unlimited batch sizes with no per-image cost. Upload your folder, select background mode, click once, download a ZIP.",
+                },
+              },
+            ],
           }),
         }}
       />
@@ -46,12 +116,16 @@ export default function RemoveBgMigration() {
       </div>
 
       <div className="prose prose-gray max-w-none">
-        <h2 className="font-heading text-2xl font-bold text-ink mb-4">What Is Happening</h2>
+              <div className="bg-accent/5 border border-accent/30 rounded-xl p-5 mb-8">
+        <p className="text-xs font-semibold text-accent uppercase tracking-wide mb-2">Updated November 13, 2026 — 18 days to shutdown</p>
+        <p className="text-sm text-sub">remove.bg is still fully operational today, and credits still process normally. The FAQ now states verbatim: &ldquo;The standalone website will no longer be available from 1 December 2026 at 9:00am CET.&rdquo; If you hold Pay-As-You-Go credits, spend them this week — support and processing capacity typically degrade in the final days. The checklist below is ordered so the highest-loss steps come first.</p>
+      </div>
+<h2 className="font-heading text-2xl font-bold text-ink mb-4">What Is Happening</h2>
         <p className="text-sub leading-relaxed mb-4">
           Canva, which acquired remove.bg in 2021, is consolidating all background removal into the Canva ecosystem. The standalone remove.bg website, desktop apps, mobile apps, Photoshop plugin, and API will all stop functioning on December 1, 2026. Background removal will continue as a feature inside Canva Pro ($14.99/month), but without batch processing, API access, or the per-image pricing model that made remove.bg popular with developers and high-volume sellers.
         </p>
         <p className="text-sub leading-relaxed mb-4">
-          This affects an estimated 10 million images processed per month and over 240 million monthly search visits. If you rely on remove.bg for any part of your workflow, you need a plan before December 1.
+          By widely cited industry estimates, remove.bg processed around 10 million images per month — whichever exact figure you use, the migration wave is large. If you rely on remove.bg for any part of your workflow, you need a plan before December 1.
         </p>
 
         <h2 className="font-heading text-2xl font-bold text-ink mb-4 mt-8">Migration Checklist</h2>
@@ -97,7 +171,7 @@ curl -H "X-Api-Key: YOUR_KEY" \\
   -o output.png \\
   https://api.remove.bg/v1.0/removebg
 
-// After migration — only the URL changes
+// Planned target format — API not live yet, no committed date
 curl -H "X-Api-Key: YOUR_KEY" \\
   -F "image_file=@photo.jpg" \\
   -F "size=auto" \\
@@ -107,7 +181,7 @@ curl -H "X-Api-Key: YOUR_KEY" \\
         </div>
 
         <p className="text-sub leading-relaxed mb-4">
-          The BatchBG API is planned for release in Q4 2026 — before the remove.bg shutdown. It will support the same parameters: image_file, image_url, size, type, format, and bg_color. Pricing will be free for standard usage with optional paid tiers for high-volume enterprise use. <a href="/remove-bg-alternative/" className="text-accent hover:underline">Sign up for API early access on the alternative page</a>.
+          A BatchBG API is in planning — the example below shows the target format (same parameters as remove.bg: image_file, image_url, size, type, format, and bg_color), but it is <strong>not live yet and has no committed release date</strong>. Do not build a December migration around it: plan on Leonardo.ai code changes or on the local in-browser route, both of which work today. When the API ships, the URL-swap example below becomes accurate. <a href="/remove-bg-alternative/" className="text-accent hover:underline">Check the alternative page for API status</a>.
         </p>
 
         <h2 className="font-heading text-2xl font-bold text-ink mb-4 mt-8"><a href="/blog/best-bulk-background-remover-2026/" className="text-accent hover:underline">Free Alternatives Comparison</a></h2>
@@ -149,7 +223,7 @@ curl -H "X-Api-Key: YOUR_KEY" \\
 
         <h2 className="font-heading text-2xl font-bold text-ink mb-4 mt-8">Why This Matters</h2>
         <p className="text-sub leading-relaxed mb-4">
-          remove.bg processed an estimated 10 million images per month. Its 240M+ monthly search visits represent a massive user base that needs to find a new solution. The shutdown is not just a product change — it is a market-level disruption in the background removal space. For context, that search volume is larger than Canva&apos;s own branded search traffic. These users are going somewhere.
+          remove.bg processed an estimated 10 million images per month. That volume of monthly processing represents a massive user base that needs to find a new solution. The shutdown is not just a product change — it is a market-level disruption in the background removal space. These users are going somewhere.
         </p>
         <p className="text-sub leading-relaxed mb-4">
           The deeper lesson: cloud-dependent tools carry inherent risk. When a company changes strategy, gets acquired, or shuts down, your workflow breaks overnight. Local processing — where the AI model runs on your own device — eliminates this dependency. BatchBG uses ONNX Runtime Web to run u2netp and BiRefNet models entirely in your browser. There is no server to shut down, no subscription to cancel, no API to deprecate.
@@ -195,7 +269,7 @@ curl -H "X-Api-Key: YOUR_KEY" \\
               <summary className="font-heading font-semibold text-ink cursor-pointer list-none flex items-center justify-between">
                 {faq.q} <span className="text-sub group-open:rotate-180 transition-transform">▼</span>
               </summary>
-              <p className="text-sub text-sm mt-3 leading-relaxed" dangerouslySetInnerHTML={{ __html: faq.a.replace("BATCH_PROCESSING_LINK", '<a href="/batch-background-remover/" class="text-accent hover:underline">batch processing</a>') }} />
+              <p className="text-sub text-sm mt-3 leading-relaxed" dangerouslySetInnerHTML={{ __html: faq.a.replace("BATCH_PROCESSING_LINK", '<a href="/bulk-background-remover/" class="text-accent hover:underline">batch processing</a>') }} />
             </details>
           ))}
         </div>
@@ -205,5 +279,6 @@ curl -H "X-Api-Key: YOUR_KEY" \\
         <strong>Related:</strong> Want to compare all alternatives side by side? See our <a href="/blog/best-bulk-background-remover-2026/" className="text-accent hover:underline">2026 bulk background remover comparison</a>.
       </p>
     </article>
+    </>
   );
 }

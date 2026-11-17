@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | BatchBG",
@@ -8,9 +9,11 @@ export const metadata: Metadata = {
 
 export default function Privacy() {
   return (
-    <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <>
+      <BreadcrumbSchema items={[{ name: 'Privacy Policy', url: 'https://batchbg.com/privacy/' }]} />
+      <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="font-heading font-bold text-3xl text-ink mb-6">Privacy Policy</h1>
-      <p className="text-sub text-sm mb-8">Last updated: September 19, 2026</p>
+      <p className="text-sub text-sm mb-8">Last updated: October 6, 2026</p>
       <div className="prose prose-gray max-w-none text-sub leading-relaxed space-y-6">
         <div>
           <h2 className="font-heading text-xl font-semibold text-ink mb-2">Image Processing</h2>
@@ -23,13 +26,21 @@ export default function Privacy() {
         </div>
         <div>
           <h2 className="font-heading text-xl font-semibold text-ink mb-2">Cookies</h2>
-          <p>BatchBG does not use cookies. We do not store any data on your device beyond the browser&apos;s standard caching of static assets (HTML, CSS, JavaScript, and the AI model file).</p>
+          <p>BatchBG itself does not store cookies or other data on your device beyond the browser&apos;s standard caching of static assets (HTML, CSS, JavaScript, and the AI model file). Analytics tools we use may set their own cookies: Google Analytics 4 sets a <code>_ga</code> measurement cookie, and Microsoft Clarity may set session cookies. We do not use tracking or advertising cookies of our own.</p>
         </div>
         <div>
           <h2 className="font-heading text-xl font-semibold text-ink mb-2">Third-Party Services</h2>
           <p><strong>Plausible Analytics:</strong> Privacy-friendly, cookieless analytics. No personal data collected. <a href="https://plausible.io/privacy" className="text-accent hover:underline" target="_blank" rel="noopener">Plausible Privacy Policy</a>.</p>
+          <p><strong>Google Analytics 4:</strong> Used to measure aggregate pageviews and audience demographics. GA4 may set a measurement cookie (gtag/_ga) in your browser. <a href="https://business.google.com/us/analytics/privacy/" className="text-accent hover:underline" target="_blank" rel="noopener">Google Privacy Policy</a>.</p>
+          <p><strong>Microsoft Clarity:</strong> Session-recording and heat analytics, aggregated and privacy-filtered by default. <a href="https://clarity.microsoft.com/terms" className="text-accent hover:underline" target="_blank" rel="noopener">Clarity Terms</a>.</p>
           <p><strong>Cloudflare:</strong> Content delivery network (CDN) for serving static files. Cloudflare processes standard HTTP request data (IP address, user agent) for security and performance. <a href="https://www.cloudflare.com/privacypolicy/" className="text-accent hover:underline" target="_blank" rel="noopener">Cloudflare Privacy Policy</a>.</p>
           <p><strong>jsDelivr CDN:</strong> Used to load ONNX Runtime WebAssembly files. Standard CDN logs may be recorded. <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-com" className="text-accent hover:underline" target="_blank" rel="noopener">jsDelivr Privacy Policy</a>.</p>
+        </div>
+        <div>
+          <h2 className="font-heading text-xl font-semibold text-ink mb-2">Advertising &amp; Affiliate Links</h2>
+          <p>Some pages on BatchBG contain affiliate links to third-party products and services (for example, image-editing software and marketplaces). If you click an affiliate link and make a purchase, we may earn a commission at no additional cost to you. Affiliate links are labeled <code>rel="sponsored nofollow"</code> and are disclosed on the pages where they appear.</p>
+          <p>We participate in affiliate programs operated by third-party networks (including Admitad). When you follow an affiliate link, the destination site and the affiliate network may set their own cookies and process data under their own privacy policies. We do not control and are not responsible for their data practices.</p>
+          <p>BatchBG does not display behavioral targeted advertising from ad networks on the tool pages themselves.</p>
         </div>
         <div>
           <h2 className="font-heading text-xl font-semibold text-ink mb-2">Your Rights (GDPR)</h2>
@@ -73,5 +84,6 @@ export default function Privacy() {
         </div>
       </div>
     </article>
+    </>
   );
 }
