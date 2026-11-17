@@ -115,7 +115,7 @@ export default function Home() {
             unlimited, no signup. A free bulk background remover that handles
             hundreds of images in one queue — 100% in your browser.
           </p>
-          <p className="text-xs text-sub mt-2">Last updated: September 2026 · By BatchBG Team</p>
+          <p className="text-xs text-sub mt-2">Last updated: November 2026 · By BatchBG Team</p>
 
           <div className="mt-8">
             <BackgroundRemoverTool />
@@ -551,6 +551,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Batch tools — entry points */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h2 className="text-2xl font-bold text-heading text-center mb-8">
+          Pick the right tool for your batch
+        </h2>
+        <div className="grid sm:grid-cols-2 gap-6">
+          <a href="/batch-background-remover/" className="block bg-white rounded-xl p-6 border border-line hover:shadow-lg transition-shadow">
+            <h3 className="font-heading font-semibold text-lg text-ink mb-2">Batch Background Remover — whole-folder workflow</h3>
+            <p className="text-sm text-sub">Drop an entire folder, get a ZIP back with every background removed and your SKU filenames kept.</p>
+          </a>
+          <a href="/bulk-background-screening/" className="block bg-white rounded-xl p-6 border border-line hover:shadow-lg transition-shadow">
+            <h3 className="font-heading font-semibold text-lg text-ink mb-2">Bulk Background Screening — check before you fix</h3>
+            <p className="text-sm text-sub">Scan a full catalog first and flag which photos actually need background work, before you process anything.</p>
+          </a>
+        </div>
+      </section>
+
       {/* Why Sellers Choose BatchBG */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-2xl font-bold text-heading text-center mb-8">
@@ -602,7 +619,10 @@ export default function Home() {
               remove.bg Alternative
             </h3>
             <p className="text-body text-sm mb-3">
-              remove.bg shuts down Dec 1, 2026. BatchBG is the free, unlimited
+              remove.bg shuts down Dec 1, 2026. After that date the standalone site closes and
+              background removal is consolidated into Canva Pro, with API users
+              directed to Leonardo.ai — so existing API integrations still need a
+              code change. BatchBG is the free, unlimited
               replacement that runs entirely in your browser — no credits, no
               API keys, no vendor lock-in.
             </p>
@@ -700,7 +720,7 @@ export default function Home() {
             <p className="text-sm text-sub">We tested 8 popular tools on 50 product photos. Real speed benchmarks, quality comparisons, and pricing breakdowns.</p>
           </a>
           <a href="/blog/remove-bg-shutting-down-migration/" className="block bg-white rounded-xl p-6 border border-line hover:shadow-lg transition-shadow">
-            <p className="text-sm text-sub mb-2">September 18, 2026 · 6 min read</p>
+            <p className="text-sm text-sub mb-2">Updated November 13, 2026 · 6 min read</p>
             <h3 className="font-heading font-semibold text-lg text-ink mb-2">remove.bg Shutting Down: Your Complete Migration Guide</h3>
             <p className="text-sm text-sub">remove.bg is closing December 1, 2026. How to migrate your workflow to free alternatives with zero downtime.</p>
           </a>

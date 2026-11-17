@@ -95,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <h3 className="font-semibold text-ink mb-3">Tools</h3>
                 <ul className="space-y-2 text-sm text-sub">
                   <li><a href="/bulk-background-remover/" className="hover:text-ink">Bulk Background Remover</a></li>
-                  <li><a href="/bulk-background-remover/" className="hover:text-ink">Batch Background Remover</a></li>
+                  <li><a href="/batch-background-remover/" className="hover:text-ink">Batch Background Remover</a></li>
                   <li><a href="/remove-background-from-product-photos/" className="hover:text-ink">Product Photo BG</a></li>
                   <li><a href="/batch-image-compressor/" className="hover:text-ink">Batch Image Compressor</a></li>
                   <li><a href="/bulk-image-resizer/" className="hover:text-ink">Bulk Image Resizer</a></li>

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "Remove backgrounds from unlimited images in one batch — free, no signup, no per-image fee. Folder upload, original filenames kept, ZIP download. Runs 100% in your browser.",
   keywords:
     "batch background remover, batch remove background, remove background from multiple images, folder background remover, free batch background remover",
-  alternates: { canonical: "https://batchbg.com/bulk-background-remover/" },
+  alternates: { canonical: "https://batchbg.com/batch-background-remover/" },
   openGraph: {
     title: "Batch Background Remover — Free, Unlimited, No Signup",
     description: "Unlimited images in one batch. Folder upload, ZIP download, 100% local. Free, no signup.",
@@ -206,6 +206,7 @@ export default function BatchBackgroundRemover() {
               { "@type": "Question", name: "How do I upload a folder of images?", acceptedAnswer: { "@type": "Answer", text: "Click Select Folder or drag an entire folder into the drop zone. BatchBG reads all JPG, PNG, and WebP files including subfolders." } },
               { "@type": "Question", name: "What happens to my file names?", acceptedAnswer: { "@type": "Answer", text: "They are preserved exactly. SKU-001.jpg becomes SKU-001_nobg.png in the ZIP download." } },
               { "@type": "Question", name: "Is there a limit on batch size?", acceptedAnswer: { "@type": "Answer", text: "No hard limit. Process as many images as your device memory allows. Most laptops handle 100+ images without issues." } },
+              { "@type": "Question", name: "Can I add more images to a running batch?", acceptedAnswer: { "@type": "Answer", text: "Yes. Click '+ Add More' in the action bar to add more files to the queue while processing is in progress. New images are appended to the current batch." } },
               { "@type": "Question", name: "Which background mode should I use for Amazon?", acceptedAnswer: { "@type": "Answer", text: "Select White mode for Amazon main images. It outputs pure RGB 255,255,255 — the exact value Amazon's automated checker validates." } },
               { "@type": "Question", name: "Does it work offline?", acceptedAnswer: { "@type": "Answer", text: "After the first page load, the AI model is cached. Subsequent sessions work offline as long as browser cache is not cleared." } },
             ],
