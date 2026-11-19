@@ -581,7 +581,9 @@ export default function Home() {
             <p className="text-body text-sm mb-3">
               One-click white background that meets Amazon, Etsy, and Shopify
               requirements. No manual adjustments — the output passes automated
-              listing checks on the first upload.
+              listing checks on the first upload. And to match the pixel specs,
+              resize the whole folder in one pass with the{' '}
+              <a href="/bulk-image-resizer/" className="text-accent hover:underline">bulk image resizer</a>.
             </p>
             <div className="flex flex-wrap gap-2">
               <span className="inline-block bg-green-bg text-green text-xs font-semibold px-2 py-1 rounded">
