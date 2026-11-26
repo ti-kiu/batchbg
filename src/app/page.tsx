@@ -493,7 +493,10 @@ export default function Home() {
         </h2>
         <p className="text-body text-center mb-8">
           Independent benchmarks against leading background removal tools on
-          standard product photography datasets.
+          standard product photography datasets. Curious what a credit-based tool
+          charges for the same job? The{" "}
+          <a href="/erase-bg-vs-batchbg/" className="text-accent hover:underline">Erase.bg vs BatchBG</a>{" "}
+          cost math covers 50, 200, and 1,000-image batches.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
