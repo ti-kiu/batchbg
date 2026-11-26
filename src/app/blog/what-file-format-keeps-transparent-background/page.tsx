@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export const metadata: Metadata = {
-  title: "What File Format Keeps a Transparent Background? | BatchBG",
+  title: "PNG, WebP, AVIF & GIF: File Formats That Keep Transparency | BatchBG",
   description:
-    "Only four common formats store real transparency: PNG, WebP, AVIF, and GIF — and each one stores it differently. Here is exactly which format to export for which job, why JPEG can never be transparent, and the alpha-vs-color-key difference that breaks most logos on dark pages.",
+    "Only PNG, WebP, AVIF and GIF keep a transparent background — each in a different way. Which format to export for which job, and why JPEG never works.",
   keywords:
     "what file format keeps a transparent background, transparent image format, png vs webp transparency, gif transparency, image format with transparency",
   alternates: { canonical: "https://batchbg.com/blog/what-file-format-keeps-transparent-background/" },
   openGraph: {
-    title: "What File Format Keeps a Transparent Background?",
+    title: "PNG, WebP, AVIF & GIF: File Formats That Keep Transparency",
     description: "PNG, WebP, AVIF, and GIF all keep transparency — but in three different mechanisms with different quality ceilings. A format-by-format decision table, the JPEG myth, and the one export setting that ruins alpha edges.",
     url: "https://batchbg.com/blog/what-file-format-keeps-transparent-background/",
     siteName: "BatchBG",
